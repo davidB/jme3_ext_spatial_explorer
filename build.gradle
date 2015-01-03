@@ -1,0 +1,103 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+		classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'provided-base'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+version = "0.1.0"
+group = "net.alchim31.jme3"
+def description = "A debug tool for jmonkeyengine : display a window to browse the content of node (root of the scene by default)."
+
+repositories {
+	mavenLocal()
+	jcenter()
+	maven { url "http://updates.jmonkeyengine.org/maven/"}
+	maven { url "http://dl.bintray.com/jmonkeyengine/contrib" }
+}
+
+sourceSets.main.resources.srcDir 'src/main/java'
+
+def v_jme3 = '3.0.10'
+
+dependencies {
+	compile 'org.controlsfx:controlsfx:8.20.8'
+	provided 'org.projectlombok:lombok:1.14.2'
+	provided "com.jme3:jme3-core:${v_jme3}"
+	provided "com.jme3:jme3-desktop:${v_jme3}"
+	provided "com.jme3:jme3-lwjgl:${v_jme3}"
+	testCompile 'junit:junit:4.12'
+}
+
+task sourcesJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+def pomConfig = {
+	licenses {
+		license {
+			name "Public domain (CC0-1.0)"
+			url "http://creativecommons.org/publicdomain/zero/1.0/"
+			distribution "repo"
+		}
+	}
+	developers {
+		developer {
+			id "davidB"
+			name "David Bernard"
+		}
+	}
+}
+
+publishing {
+	publications {
+		mavenStuff(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			pom.withXml {
+				def root = asNode()
+				root.appendNode('description', description)
+				root.children().last() + pomConfig
+			}
+		}
+	}
+}
+
+bintray {
+	user = bintray_user
+	key = bintray_api_key
+
+	publications = ['mavenStuff'] //When uploading Maven-based publication files
+	//dryRun = false //Whether to run this as dry-run, without deploying
+	publish = true //If version should be auto published after an upload
+	pkg {
+		repo = 'jme3stuff'
+		name = project.name
+		desc = description
+		websiteUrl = "https://github.com/davidB/${project.name}"
+		issueTrackerUrl = "https://github.com/davidB/${project.name}/issues"
+		vcsUrl = "https://github.com/davidB/${project.name}.git"
+		licenses = ['CC0-1.0']
+		labels = ['jme3']
+		publicDownloadNumbers = true
+		version {
+			name = project.version
+			vcsTag = project.version
+		}
+	}
+}
+
