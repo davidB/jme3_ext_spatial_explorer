@@ -29,6 +29,7 @@ dependencies {
 		AppStateSpatialExplorer se = new AppStateSpatialExplorer();
 		Helper.registerAction_Refresh(se.spatialExplorer);
 		Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
+		Helper.registerBarAction_PrintToto(se.spatialExplorer);
 		app.getStateManager().attach(se);
 		return null;
 	});
@@ -42,7 +43,7 @@ see [Demo.java](src/test/java/samples/Demo.java] for a complete sample.
 ```
 	@SuppressWarnings("unchecked")
 	public static void registerAction_MyVerb(SpatialExplorer se) {
-		se.actions.add(new Action("My Verb Label", (evt) -> {
+		se.treeItemActions.add(new Action("My Verb Label", (evt) -> {
 			TreeItem<Spatial> treeItem = (TreeItem<Spatial>)evt.getSource();
 			Spatial spatial = treeItem.getValue();
 			// do my stuff
@@ -50,7 +51,7 @@ see [Demo.java](src/test/java/samples/Demo.java] for a complete sample.
 	}
 ```
 
-see registerAction_Refresh or registerAction_ShowLocalAxis int [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for a complete sample.
+see registerAction_Refresh or registerAction_ShowLocalAxis in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for a complete sample.
 
 ## Add action on selection change
 
@@ -69,3 +70,16 @@ see registerAction_Refresh or registerAction_ShowLocalAxis int [Helper.java](src
 	});
 
 ```
+
+## Add Top ToolBar action
+```
+	@SuppressWarnings("unchecked")
+	public static void registerAction_MyVerb(SpatialExplorer se) {
+		se.barActions.add(new Action("My Verb Label", (evt) -> {
+			// do my stuff
+		}));
+	}
+```
+
+see registerBarAction_PrintToto in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for a complete sample.
+

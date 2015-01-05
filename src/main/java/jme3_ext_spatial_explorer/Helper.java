@@ -76,9 +76,15 @@ public class Helper {
 
 	@SuppressWarnings("unchecked")
 	public static void registerAction_Refresh(SpatialExplorer se) {
-		se.actions.add(new Action("Refresh", (evt) -> {
+		se.treeItemActions.add(new Action("Refresh", (evt) -> {
 			TreeItem<Spatial> treeItem = (TreeItem<Spatial>)evt.getSource();
 			se.update(treeItem.getValue(), treeItem);
+		}));
+	}
+
+	public static void registerBarAction_PrintToto(SpatialExplorer se) {
+		se.barActions.add(new Action("Toto", (evt) -> {
+			System.out.println("toto");
 		}));
 	}
 
@@ -102,7 +108,7 @@ public class Helper {
 			protected void controlRender(RenderManager rm, ViewPort vp) {
 			}
 		};
-		se.actions.add(new Action("Show Local Axis", (evt) -> {
+		se.treeItemActions.add(new Action("Show Local Axis", (evt) -> {
 			app.enqueue(()->{
 				Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
 				if (target != axisSync.getSpatial()) {

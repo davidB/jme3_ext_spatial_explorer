@@ -57,6 +57,7 @@ public class Demo {
 			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
 			Helper.registerAction_Refresh(se.spatialExplorer);
 			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
+			Helper.registerBarAction_PrintToto(se.spatialExplorer);
 //			se.spatialExplorer.selection.addListener((observable, oldValue, newValue) -> {
 //				app.enqueue(()->{
 //					if (oldValue != null) {

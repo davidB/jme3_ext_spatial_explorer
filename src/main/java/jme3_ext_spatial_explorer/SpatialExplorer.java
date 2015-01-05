@@ -21,9 +21,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +34,7 @@ import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.PropertySheet.Item;
 import org.controlsfx.control.PropertySheet.Mode;
 import org.controlsfx.control.action.Action;
+import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.property.BeanProperty;
 
 import com.jme3.scene.Node;
@@ -46,7 +49,8 @@ public class SpatialExplorer {
 	public final ObjectProperty<Spatial> selection = new SimpleObjectProperty<>();
 
 	/** List of actions on TreeItem via ContextMenu. actions should be registered before start(). */
-	public final List<Action> actions = new LinkedList<>();
+	public final List<Action> treeItemActions = new LinkedList<>();
+	public final List<Action> barActions = new LinkedList<>();
 
 	MasterDetailPane makePane() {
 		details = new PropertySheet();
@@ -82,13 +86,27 @@ public class SpatialExplorer {
 		return pane;
 	}
 
+	public ToolBar makeBar() {
+		ToolBar b = new ToolBar();
+		for(Action a : barActions) {
+			javafx.scene.Node n = a.getGraphic();
+			if (n == null) {
+				n = ActionUtils.createButton(a);
+			}
+			b.getItems().add(n);
+		}
+		return b;
+	}
 	public void start(Stage primaryStage) {
 		stop();
 		this.stage = primaryStage;
 		primaryStage.setTitle("Spatial Explorer");
 		//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
 		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
-		primaryStage.setScene(new Scene(makePane(), 600, 500));
+		BorderPane root = new BorderPane();
+		root.setTop(makeBar());
+		root.setCenter(makePane());
+		primaryStage.setScene(new Scene(root, 600, 500));
 		primaryStage.show();
 	}
 
@@ -131,8 +149,9 @@ public class SpatialExplorer {
 		public MyTreeCell() {
 			editableProperty().set(false);
 			setContextMenu(menu);
-			for (Action a : actions) {
-				MenuItem mi = new MenuItem(a.getText());
+			for (Action a : treeItemActions) {
+				MenuItem mi = ActionUtils.createMenuItem(a);
+				//MenuItem mi = new MenuItem(a.getText());
 				mi.setOnAction((evt) -> {a.handle(new ActionEvent(getTreeItem(), evt.getTarget()));});
 				menu.getItems().add(mi);
 			}
