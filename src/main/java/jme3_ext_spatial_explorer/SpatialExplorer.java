@@ -35,6 +35,7 @@ import org.controlsfx.property.BeanProperty;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.sun.javafx.css.StyleManager;
 
 public class SpatialExplorer {
 	TreeItem<Spatial> rootItem = new TreeItem<Spatial>();
@@ -81,6 +82,8 @@ public class SpatialExplorer {
 		stop();
 		this.stage = primaryStage;
 		primaryStage.setTitle("Spatial Explorer");
+		//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
+		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
 		primaryStage.setScene(new Scene(makePane(), 600, 500));
 		primaryStage.show();
 	}
@@ -172,7 +175,12 @@ class ActionShowInPropertySheet extends Action {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void handle(WorkerStateEvent e) {
-				propertySheet.getItems().setAll((ObservableList<Item>) e.getSource().getValue());
+				ObservableList<Item> items = (ObservableList<Item>) e.getSource().getValue();
+				if (items != null) {
+					propertySheet.getItems().setAll(items);
+				} else {
+					propertySheet.getItems().clear();
+				}
 			}
 		});
 		service.start();
