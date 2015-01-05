@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.controlsfx.control.MasterDetailPane;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.PropertySheet.Item;
+import org.controlsfx.control.PropertySheet.Mode;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.property.BeanProperty;
 
@@ -49,6 +50,9 @@ public class SpatialExplorer {
 
 	MasterDetailPane makePane() {
 		details = new PropertySheet();
+		details.setMode(Mode.CATEGORY);
+		details.setModeSwitcherVisible(true);
+		details.setSearchBoxVisible(true);
 
 		selectAction = new ActionShowInPropertySheet("test", null, details);
 
