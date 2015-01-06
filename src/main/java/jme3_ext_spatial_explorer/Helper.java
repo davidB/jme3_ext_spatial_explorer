@@ -1,13 +1,16 @@
 package jme3_ext_spatial_explorer;
 
+import java.io.File;
 import java.util.List;
 
 import javafx.scene.control.TreeItem;
+import javafx.stage.FileChooser;
 
 import org.controlsfx.control.action.Action;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
+import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -119,6 +122,30 @@ public class Helper {
 				}
 				return null;
 			});
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_SaveAsJ3O(SpatialExplorer se, SimpleApplication app) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().addAll(
+			new FileChooser.ExtensionFilter("jMonkeyEngine Object (*.j3o)", "*.j3o")
+		);
+		se.treeItemActions.add(new Action("Save as .j3o", (evt) -> {
+			System.out.println("target : " + evt.getTarget());
+			File f0 = fileChooser.showSaveDialog(
+					null
+//					((MenuItem)evt.getTarget()).getGraphic().getScene().getWindow()
+//					((MenuItem)evt.getTarget()).getParentPopup()
+			);
+			if (f0 != null) {
+				File f = (f0.getName().endsWith(".j3o"))? f0 : new File(f0.getParentFile(), f0.getName() + ".j3o");
+				app.enqueue(()->{
+					Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
+					new BinaryExporter().save(target, f);
+					return null;
+				});
+			}
 		}));
 	}
 }
