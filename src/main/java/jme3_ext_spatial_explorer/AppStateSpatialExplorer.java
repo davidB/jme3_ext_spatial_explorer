@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.sun.javafx.application.PlatformImpl;
 
 public class AppStateSpatialExplorer extends AbstractAppState {
 	public final SpatialExplorer spatialExplorer = new SpatialExplorer();
@@ -16,7 +15,7 @@ public class AppStateSpatialExplorer extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, com.jme3.app.Application app) {
 		super.initialize(stateManager, app);
 		this.app =(SimpleApplication) app;
-		initJFX();
+		Helper.initJfx();
 		setEnabled(true);
 	}
 
@@ -45,14 +44,5 @@ public class AppStateSpatialExplorer extends AbstractAppState {
 			});
 		}
 	};
-	public void initJFX() {
-		//new JFXPanel();
-		// Note that calling PlatformImpl.startup more than once is OK
-		PlatformImpl.startup(new Runnable() {
-			@Override public void run() {
-				// No need to do anything here
-			}
-		});
-	}
 }
 

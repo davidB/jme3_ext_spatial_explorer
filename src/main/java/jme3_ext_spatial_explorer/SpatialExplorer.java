@@ -39,7 +39,6 @@ import org.controlsfx.property.BeanProperty;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.sun.javafx.css.StyleManager;
 
 public class SpatialExplorer {
 	TreeItem<Spatial> rootItem = new TreeItem<Spatial>();
@@ -101,8 +100,6 @@ public class SpatialExplorer {
 		stop();
 		this.stage = primaryStage;
 		primaryStage.setTitle("Spatial Explorer");
-		//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
-		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
 		BorderPane root = new BorderPane();
 		root.setTop(makeBar());
 		root.setCenter(makePane());
