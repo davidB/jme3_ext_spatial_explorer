@@ -48,8 +48,17 @@ public class Helper {
 	}
 
 	//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static void initJfxStyle() {
-		com.sun.javafx.Logging.getCSSLogger().setLevel(sun.util.logging.PlatformLogger.Level.SEVERE);
+		//use reflection because sun.util.logging.PlatformLogger.Level is not always available
+		try {
+			//com.sun.javafx.Logging.getCSSLogger().setLevel(sun.util.logging.PlatformLogger.Level.SEVERE);
+			Class<Enum> e = (Class<Enum>)Class.forName("sun.util.logging.PlatformLogger$Level");
+			Object o = Class.forName("com.sun.javafx.Logging").getMethod("getCSSLogger").invoke(null);
+			o.getClass().getMethod("setLevel", e).invoke(o, Enum.valueOf(e, "SEVERE"));
+		} catch(Exception exc) {
+			exc.printStackTrace();
+		}
 //		StyleManager.getInstance().addUserAgentStylesheet(Thread.currentThread().getContextClassLoader().getResource( "com/sun/javafx/scene/control/skin/modena/modena.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(GlyphFont.class.getResource("glyphfont.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(CommandLinksDialog.class.getResource("commandlink.bss").toExternalForm());
