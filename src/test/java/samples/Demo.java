@@ -62,6 +62,7 @@ public class Demo {
 			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
 			Helper.registerBarAction_PrintToto(se.spatialExplorer);
 			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
+			Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
 //			se.spatialExplorer.selection.addListener((observable, oldValue, newValue) -> {
 //				app.enqueue(()->{
 //					if (oldValue != null) {

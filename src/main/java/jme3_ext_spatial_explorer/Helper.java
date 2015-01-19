@@ -13,6 +13,7 @@ import org.controlsfx.control.action.Action;
 import com.jme3.animation.AnimControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
@@ -276,4 +277,15 @@ public class Helper {
 			}
 		}));
 	}
+
+	public static void registerBarAction_SceneInDebugPhysic(SpatialExplorer se, SimpleApplication app) {
+		se.barActions.add(new Action("Debug Physic", (evt) -> {
+			BulletAppState s = app.getStateManager().getState(BulletAppState.class);
+			if (s != null) {
+				s.setDebugEnabled(!s.isDebugEnabled());
+			}
+			//physicsSpace.enableDebug(assetManager);
+		}));
+	}
+
 }
