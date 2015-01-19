@@ -4,11 +4,14 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 
+
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser;
 
+
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
+
 
 import com.jme3.animation.AnimControl;
 import com.jme3.app.SimpleApplication;
@@ -26,6 +29,7 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.debug.Arrow;
@@ -214,31 +218,30 @@ public class Helper {
 		se.treeItemActions.add(new Action("Show Skeleton", (evt) -> {
 			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
 			app.enqueue(() -> {
-				if (!(target instanceof Node)) {
-					System.out.println("can't Show Skeleton on non-Node");
-					return null;
-				}
-				Node n = (Node)target;
-				String name = "skeletonDebugger";
-				int i = -1;
-				Spatial child;
-				do {
-					i++;
-					child = n.getChild(name + i);
-				} while (child != null && !(child instanceof SkeletonDebugger));
-				if (child != null) {
-					n.detachChild(child);
-				} else {
-					AnimControl control = n.getControl(AnimControl.class);
-					if (control != null) {
-						final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, control.getSkeleton());
-						final Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-						mat.setColor("Color", ColorRGBA.Green);
-						mat.getAdditionalRenderState().setDepthTest(false);
-						skeletonDebug.setMaterial(mat);
-						n.attachChild(skeletonDebug);
+				target.breadthFirstTraversal(new SceneGraphVisitorAdapter(){
+					public void visit(Node n) {
+						String name = "skeletonDebugger";
+						int i = -1;
+						Spatial child;
+						do {
+							i++;
+							child = n.getChild(name + i);
+						} while (child != null && !(child instanceof SkeletonDebugger));
+						if (child != null) {
+							n.detachChild(child);
+						} else {
+							AnimControl control = n.getControl(AnimControl.class);
+							if (control != null) {
+								final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, control.getSkeleton());
+								final Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+								mat.setColor("Color", ColorRGBA.Green);
+								mat.getAdditionalRenderState().setDepthTest(false);
+								skeletonDebug.setMaterial(mat);
+								n.attachChild(skeletonDebug);
+							}
+						}
 					}
-				}
+				});
 				return null;
 			});
 		}));
@@ -249,20 +252,20 @@ public class Helper {
 		se.treeItemActions.add(new Action("Show Wireframe", (evt) -> {
 			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
 			app.enqueue(() -> {
-				if (!(target instanceof Geometry)) {
-					System.out.println("can't Show Wireframe on non-Geometry");
-					return null;
-				}
-				RenderState r = ((Geometry)target).getMaterial().getAdditionalRenderState();
-				boolean wireframe = false;
-				try {
-					Field f = r.getClass().getDeclaredField("wireframe");
-					f.setAccessible(true);
-					wireframe = (Boolean) f.get(r);
-				} catch(Exception exc) {
-					exc.printStackTrace();
-				}
-				r.setWireframe(!wireframe);
+				target.breadthFirstTraversal(new SceneGraphVisitorAdapter(){
+					public void visit(Geometry geom) {
+						RenderState r = geom.getMaterial().getAdditionalRenderState();
+						boolean wireframe = false;
+						try {
+							Field f = r.getClass().getDeclaredField("wireframe");
+							f.setAccessible(true);
+							wireframe = (Boolean) f.get(r);
+						} catch(Exception exc) {
+							exc.printStackTrace();
+						}
+						r.setWireframe(!wireframe);
+					}
+				});
 				return null;
 			});
 		}));
@@ -303,6 +306,7 @@ public class Helper {
 					s = new StatsAppState();
 					app.getStateManager().attach(s);
 					s.setDisplayStatView(true);
+					s.setDisplayFps(false);
 				} else {
 					boolean v = true;
 					try {
@@ -326,6 +330,7 @@ public class Helper {
 				if (s == null) {
 					s = new StatsAppState();
 					app.getStateManager().attach(s);
+					s.setDisplayStatView(false);
 					s.setDisplayFps(true);
 				} else {
 					boolean v = true;
