@@ -1,6 +1,7 @@
 package jme3_ext_spatial_explorer;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import javafx.scene.control.TreeItem;
@@ -9,14 +10,17 @@ import javafx.stage.FileChooser;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
 
+import com.jme3.animation.AnimControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -24,6 +28,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
+import com.jme3.scene.debug.SkeletonDebugger;
 import com.sun.javafx.application.PlatformImpl;
 import com.sun.javafx.css.StyleManager;
 
@@ -144,6 +149,10 @@ public class Helper {
 	public static void registerAction_ShowLocalAxis(SpatialExplorer se, SimpleApplication app) {
 		//Spatial axis = app.getRootNode().getChild("axis");
 		Spatial axis = makeCoordinateAxes(Vector3f.ZERO, app.getAssetManager());
+		axis.setQueueBucket(Bucket.Translucent);
+		for(Spatial s : ((Node)axis).getChildren()) {
+			((Geometry)s).getMaterial().getAdditionalRenderState().setDepthTest(false);
+		}
 		axis.setName("localAxis");
 		AbstractControl axisSync = new AbstractControl() {
 			@Override
@@ -194,6 +203,76 @@ public class Helper {
 					new BinaryExporter().save(target, f);
 					return null;
 				});
+			}
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_ShowSkeleton(SpatialExplorer se, SimpleApplication app) {
+		se.treeItemActions.add(new Action("Show Skeleton", (evt) -> {
+			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
+			app.enqueue(() -> {
+				if (!(target instanceof Node)) {
+					System.out.println("can't Show Skeleton on non-Node");
+					return null;
+				}
+				Node n = (Node)target;
+				String name = "skeletonDebugger";
+				int i = -1;
+				Spatial child;
+				do {
+					i++;
+					child = n.getChild(name + i);
+				} while (child != null && !(child instanceof SkeletonDebugger));
+				if (child != null) {
+					n.detachChild(child);
+				} else {
+					AnimControl control = n.getControl(AnimControl.class);
+					if (control != null) {
+						final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, control.getSkeleton());
+						final Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+						mat.setColor("Color", ColorRGBA.Green);
+						mat.getAdditionalRenderState().setDepthTest(false);
+						skeletonDebug.setMaterial(mat);
+						n.attachChild(skeletonDebug);
+					}
+				}
+				return null;
+			});
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_ShowWireframe(SpatialExplorer se, SimpleApplication app) {
+		se.treeItemActions.add(new Action("Show Wireframe", (evt) -> {
+			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
+			app.enqueue(() -> {
+				if (!(target instanceof Geometry)) {
+					System.out.println("can't Show Wireframe on non-Geometry");
+					return null;
+				}
+				RenderState r = ((Geometry)target).getMaterial().getAdditionalRenderState();
+				boolean wireframe = false;
+				try {
+					Field f = r.getClass().getDeclaredField("wireframe");
+					f.setAccessible(true);
+					wireframe = (Boolean) f.get(r);
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
+				r.setWireframe(!wireframe);
+				return null;
+			});
+		}));
+	}
+
+	public static void registerBarAction_SceneInWireframe(SpatialExplorer se, SimpleApplication app) {
+		WireProcessor p = new WireProcessor(app.getAssetManager());
+		se.barActions.add(new Action("Scene In Wireframe", (evt) -> {
+			if (app.getViewPort().getProcessors().contains(p)) {
+				app.getViewPort().removeProcessor(p);
+			} else {
+				app.getViewPort().addProcessor(p);
 			}
 		}));
 	}

@@ -58,7 +58,10 @@ public class Demo {
 			Helper.registerAction_Refresh(se.spatialExplorer);
 			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
 			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
+			Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
+			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
 			Helper.registerBarAction_PrintToto(se.spatialExplorer);
+			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
 //			se.spatialExplorer.selection.addListener((observable, oldValue, newValue) -> {
 //				app.enqueue(()->{
 //					if (oldValue != null) {
