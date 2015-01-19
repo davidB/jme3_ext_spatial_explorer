@@ -271,63 +271,75 @@ public class Helper {
 	public static void registerBarAction_SceneInWireframe(SpatialExplorer se, SimpleApplication app) {
 		WireProcessor p = new WireProcessor(app.getAssetManager());
 		se.barActions.add(new Action("Scene In Wireframe", (evt) -> {
-			if (app.getViewPort().getProcessors().contains(p)) {
-				app.getViewPort().removeProcessor(p);
-			} else {
-				app.getViewPort().addProcessor(p);
-			}
+			app.enqueue(() -> {
+				if (app.getViewPort().getProcessors().contains(p)) {
+					app.getViewPort().removeProcessor(p);
+				} else {
+					app.getViewPort().addProcessor(p);
+				}
+				return null;
+			});
 		}));
 	}
 
 	public static void registerBarAction_SceneInDebugPhysic(SpatialExplorer se, SimpleApplication app) {
 		se.barActions.add(new Action("Debug Physic", (evt) -> {
-			BulletAppState s = app.getStateManager().getState(BulletAppState.class);
-			if (s != null) {
-				s.setDebugEnabled(!s.isDebugEnabled());
-			}
-			//physicsSpace.enableDebug(assetManager);
+			app.enqueue(() -> {
+				BulletAppState s = app.getStateManager().getState(BulletAppState.class);
+				if (s != null) {
+					s.setDebugEnabled(!s.isDebugEnabled());
+				}
+				//physicsSpace.enableDebug(assetManager);
+				return null;
+			});
 		}));
 	}
 
 	public static void registerBarAction_ShowStats(SpatialExplorer se, SimpleApplication app) {
 		se.barActions.add(new Action("Show Stats", (evt) -> {
-			StatsAppState s = app.getStateManager().getState(StatsAppState.class);
-			if (s == null) {
-				s = new StatsAppState();
-				app.getStateManager().attach(s);
-				s.setDisplayStatView(true);
-			} else {
-				boolean v = true;
-				try {
-					Field f = s.getClass().getDeclaredField("showStats");
-					f.setAccessible(true);
-					v = (Boolean) f.get(s);
-				} catch(Exception exc) {
-					exc.printStackTrace();
+			app.enqueue(() -> {
+				StatsAppState s = app.getStateManager().getState(StatsAppState.class);
+				if (s == null) {
+					s = new StatsAppState();
+					app.getStateManager().attach(s);
+					s.setDisplayStatView(true);
+				} else {
+					boolean v = true;
+					try {
+						Field f = s.getClass().getDeclaredField("showStats");
+						f.setAccessible(true);
+						v = (Boolean) f.get(s);
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					s.setDisplayStatView(!v);
 				}
-				s.setDisplayStatView(!v);
-			}
+				return null;
+			});
 		}));
 	}
 
 	public static void registerBarAction_ShowFps(SpatialExplorer se, SimpleApplication app) {
 		se.barActions.add(new Action("Show FPS", (evt) -> {
-			StatsAppState s = app.getStateManager().getState(StatsAppState.class);
-			if (s == null) {
-				s = new StatsAppState();
-				app.getStateManager().attach(s);
-				s.setDisplayFps(true);
-			} else {
-				boolean v = true;
-				try {
-					Field f = s.getClass().getDeclaredField("showFps");
-					f.setAccessible(true);
-					v = (Boolean) f.get(s);
-				} catch(Exception exc) {
-					exc.printStackTrace();
+			app.enqueue(() -> {
+				StatsAppState s = app.getStateManager().getState(StatsAppState.class);
+				if (s == null) {
+					s = new StatsAppState();
+					app.getStateManager().attach(s);
+					s.setDisplayFps(true);
+				} else {
+					boolean v = true;
+					try {
+						Field f = s.getClass().getDeclaredField("showFps");
+						f.setAccessible(true);
+						v = (Boolean) f.get(s);
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					s.setDisplayFps(!v);
 				}
-				s.setDisplayFps(!v);
-			}
+				return null;
+			});
 		}));
 	}
 
