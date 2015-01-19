@@ -12,6 +12,7 @@ import org.controlsfx.control.action.Action;
 
 import com.jme3.animation.AnimControl;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.export.binary.BinaryExporter;
@@ -285,6 +286,48 @@ public class Helper {
 				s.setDebugEnabled(!s.isDebugEnabled());
 			}
 			//physicsSpace.enableDebug(assetManager);
+		}));
+	}
+
+	public static void registerBarAction_ShowStats(SpatialExplorer se, SimpleApplication app) {
+		se.barActions.add(new Action("Show Stats", (evt) -> {
+			StatsAppState s = app.getStateManager().getState(StatsAppState.class);
+			if (s == null) {
+				s = new StatsAppState();
+				app.getStateManager().attach(s);
+				s.setDisplayStatView(true);
+			} else {
+				boolean v = true;
+				try {
+					Field f = s.getClass().getDeclaredField("showStats");
+					f.setAccessible(true);
+					v = (Boolean) f.get(s);
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
+				s.setDisplayStatView(!v);
+			}
+		}));
+	}
+
+	public static void registerBarAction_ShowFps(SpatialExplorer se, SimpleApplication app) {
+		se.barActions.add(new Action("Show FPS", (evt) -> {
+			StatsAppState s = app.getStateManager().getState(StatsAppState.class);
+			if (s == null) {
+				s = new StatsAppState();
+				app.getStateManager().attach(s);
+				s.setDisplayFps(true);
+			} else {
+				boolean v = true;
+				try {
+					Field f = s.getClass().getDeclaredField("showFps");
+					f.setAccessible(true);
+					v = (Boolean) f.get(s);
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
+				s.setDisplayFps(!v);
+			}
 		}));
 	}
 
