@@ -1,6 +1,6 @@
 A simple (extensible) GUI window to display the content (Spatials) of a jmonkeyengine scene. It can be used at runtime, debug/test time.
 
-Requirements: javafx 8
+Requirements: javafx 8 (java 8u20+)
 
 # Install
 
@@ -22,22 +22,35 @@ dependencies {
 ## into java code
 
 ```
-	SimpleApplication app = ...
-	
-	//Setup SpatialExplorer
-	app.enqueue(() -> {
-		AppStateSpatialExplorer se = new AppStateSpatialExplorer();
-		Helper.registerAction_Refresh(se.spatialExplorer);
-		Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
-		Helper.registerBarAction_PrintToto(se.spatialExplorer);
-		app.getStateManager().attach(se);
-		return null;
-	});
+		SimpleApplication app = ...
+
+		//Setup SpatialExplorer
+		Helper.setupSpatialExplorerWithAll(app);
+//		app.enqueue(() -> {
+//			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
+//			Helper.registerAction_Refresh(se.spatialExplorer);
+//			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
+//			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
+//			Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
+//			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
+//			Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
+//			Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
+//			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
+//			Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
+//			app.getStateManager().attach(se);
+//			return null;
+//		});
+		app.enqueue(() -> {
+			AppStateSpatialExplorer se = app.getStateManager().getState(AppStateSpatialExplorer.class);
+			// register my custom Action and BarAction
+			registerBarAction_PrintToto(se.spatialExplorer);
+			return null;
+		});
 ```
 
 see [Demo.java](src/test/java/samples/Demo.java] for a complete sample.
 
-# Customisation
+# Customization
 
 ## Add Context Menu action
 ```
@@ -81,5 +94,5 @@ see registerAction_Refresh or registerAction_ShowLocalAxis in [Helper.java](src/
 	}
 ```
 
-see registerBarAction_PrintToto in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for a complete sample.
+see registerBarAction_Xxx in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for samples.
 
