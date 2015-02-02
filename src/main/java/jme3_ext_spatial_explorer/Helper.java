@@ -4,19 +4,17 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 
-
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser;
 
-
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
-
 
 import com.jme3.animation.AnimControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
@@ -37,7 +35,10 @@ import com.jme3.scene.debug.Grid;
 import com.jme3.scene.debug.SkeletonDebugger;
 import com.sun.javafx.application.PlatformImpl;
 import com.sun.javafx.css.StyleManager;
+import com.jme3.scene.debug.WireBox;
 
+// TODO add helper to displayDebug and displayFrustum of AbstractShadowRenderer (a SceneProcessor)
+// TODO add helper to list SceneProcessor and display Properties
 public class Helper {
 
 	public static void dump(Node node, String prefix) {
@@ -145,12 +146,6 @@ public class Helper {
 		}));
 	}
 
-	public static void registerBarAction_PrintToto(SpatialExplorer se) {
-		se.barActions.add(new Action("Toto", (evt) -> {
-			System.out.println("toto");
-		}));
-	}
-
 	@SuppressWarnings("unchecked")
 	public static void registerAction_ShowLocalAxis(SpatialExplorer se, SimpleApplication app) {
 		//Spatial axis = app.getRootNode().getChild("axis");
@@ -231,7 +226,7 @@ public class Helper {
 							n.detachChild(child);
 						} else {
 							AnimControl control = n.getControl(AnimControl.class);
-							if (control != null) {
+							if (control != null && control.getSkeleton() != null) {
 								final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, control.getSkeleton());
 								final Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 								mat.setColor("Color", ColorRGBA.Green);
@@ -266,6 +261,40 @@ public class Helper {
 						r.setWireframe(!wireframe);
 					}
 				});
+				return null;
+			});
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_ShowBound(SpatialExplorer se, SimpleApplication app) {
+		Material mat_box = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		mat_box.setColor("Color", ColorRGBA.Orange);
+
+		se.treeItemActions.add(new Action("Show Bound", (evt) -> {
+			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
+			app.enqueue(() -> {
+				target.breadthFirstTraversal(new SceneGraphVisitorAdapter(){
+					public void visit(Geometry geom) {
+						WireBoxControl ctrl = geom.getControl(WireBoxControl.class);
+						if (ctrl != null) {
+							geom.removeControl(ctrl);
+						} else {
+							geom.addControl(new WireBoxControl(mat_box));
+						}
+					}
+				});
+				return null;
+			});
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_Remove(SpatialExplorer se, SimpleApplication app) {
+		se.treeItemActions.add(new Action("Remove", (evt) -> {
+			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
+			app.enqueue(() -> {
+				target.removeFromParent();
 				return null;
 			});
 		}));
@@ -348,4 +377,59 @@ public class Helper {
 		}));
 	}
 
+	public static void setupSpatialExplorerWithAll(SimpleApplication app) {
+		app.enqueue(() -> {
+			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
+			Helper.registerAction_Refresh(se.spatialExplorer);
+			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
+			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
+			Helper.registerAction_ShowBound(se.spatialExplorer, app);
+			Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
+			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
+			Helper.registerAction_Remove(se.spatialExplorer, app);
+			Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
+			Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
+			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
+			Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
+			app.getStateManager().attach(se);
+			return null;
+		});
+	}
+
+	public static class WireBoxControl extends AbstractControl {
+		final WireBox wbx = new WireBox();
+		final Geometry gwbx = new Geometry("", wbx);
+
+		WireBoxControl(Material mat) {
+			gwbx.setMaterial(mat);
+		}
+
+		@Override
+		public void setSpatial(Spatial s) {
+			super.setSpatial(s);
+			if (s != null) {
+				Node root = s.getParent();
+				for(;root.getParent() != null; root = root.getParent());
+				root.attachChild(gwbx);
+				gwbx.setName("bounds." + s.getName());
+			} else {
+				gwbx.removeFromParent();
+			}
+		}
+
+		@Override
+		protected void controlUpdate(float tpf) {
+			Geometry geom = (Geometry) getSpatial();
+			if (geom != null) {
+				wbx.fromBoundingBox((BoundingBox) geom.getModelBound());
+				gwbx.setLocalTransform(geom.getWorldTransform());
+				//gwbx.updateGeometricState();
+			}
+		}
+
+		@Override
+		protected void controlRender(RenderManager rm, ViewPort vp) {
+		}
+
+	}
 }
