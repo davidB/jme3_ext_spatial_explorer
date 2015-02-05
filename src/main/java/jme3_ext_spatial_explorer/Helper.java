@@ -2,7 +2,9 @@ package jme3_ext_spatial_explorer;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser;
@@ -21,9 +23,11 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
@@ -36,9 +40,11 @@ import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 import com.jme3.scene.debug.SkeletonDebugger;
+import com.jme3.scene.debug.WireFrustum;
 import com.sun.javafx.application.PlatformImpl;
 import com.sun.javafx.css.StyleManager;
 import com.jme3.scene.debug.WireBox;
+import com.jme3.shadow.ShadowUtil;
 
 // TODO add helper to displayDebug and displayFrustum of AbstractShadowRenderer (a SceneProcessor)
 // TODO add helper to list SceneProcessor and display Properties
@@ -218,7 +224,7 @@ public class Helper {
 			app.enqueue(() -> {
 				target.breadthFirstTraversal(new SceneGraphVisitorAdapter(){
 					public void visit(Node n) {
-						String name = "skeletonDebugger";
+						String name = "skeletonDebugger.";
 						int i = -1;
 						Spatial child;
 						do {
@@ -390,6 +396,53 @@ public class Helper {
 		}));
 	}
 
+	public static void registerBarAction_ShowFrustums(SpatialExplorer se, SimpleApplication app) {
+		se.barActions.add(new Action("Show Frustums", (evt) -> {
+			app.enqueue(() -> {
+				Node grp = (Node) app.getRootNode().getChild("_frustums");
+				if (grp != null) {
+					grp.removeFromParent();
+				} else {
+					grp = new Node("_frustums");
+					app.getRootNode().attachChild(grp);
+					Set<Camera> cameras = new HashSet<>();
+					for(ViewPort vp : app.getRenderManager().getMainViews()) {
+						Camera cam = vp.getCamera();
+						if (!cameras.contains(cam)) {
+							grp.attachChild(createFrustum(cam, app.getAssetManager()));
+							cameras.add(cam);
+						}
+					}
+				}
+				return null;
+			});
+		}));
+	}
+
+	public static Geometry createFrustum(Camera cam, AssetManager assetManager){
+		Vector3f[] pts = new Vector3f[8];
+		for(int i = 0; i < pts.length; i++) pts[i] = new Vector3f();
+		ShadowUtil.updateFrustumPoints2(cam, pts);
+		WireFrustum frustum = new WireFrustum(pts);
+		Geometry frustumMdl = new Geometry("frustum."+cam.getName(), frustum);
+		frustumMdl.setCullHint(Spatial.CullHint.Never);
+		frustumMdl.setShadowMode(ShadowMode.Off);
+		frustumMdl.setMaterial(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
+		frustumMdl.getMaterial().setColor("Color", ColorRGBA.Brown);
+		frustumMdl.addControl(new AbstractControl() {
+			@Override
+			protected void controlUpdate(float tpf) {
+				ShadowUtil.updateFrustumPoints2(cam, pts);
+				frustum.update(pts);
+			}
+
+			@Override
+			protected void controlRender(RenderManager rm, ViewPort vp) {
+			}
+		});
+		return frustumMdl;
+	}
+
 	public static void setupSpatialExplorerWithAll(SimpleApplication app) {
 		app.enqueue(() -> {
 			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
@@ -404,6 +457,7 @@ public class Helper {
 			Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
 			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
 			Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
+			Helper.registerBarAction_ShowFrustums(se.spatialExplorer, app);
 			app.getStateManager().attach(se);
 			return null;
 		});
@@ -419,7 +473,11 @@ public class Helper {
 
 		ShowBoundsControl(Material matModel, Material matWorld) {
 			mgeo.setMaterial(matModel);
+			mgeo.setCullHint(Spatial.CullHint.Never);
+			mgeo.setShadowMode(ShadowMode.Off);
 			wgeo.setMaterial(matWorld);
+			wgeo.setCullHint(Spatial.CullHint.Never);
+			wgeo.setShadowMode(ShadowMode.Off);
 		}
 
 		@Override
@@ -460,8 +518,6 @@ public class Helper {
 
 		@Override
 		protected void controlRender(RenderManager rm, ViewPort vp) {
-			// TODO Auto-generated method stub
-
 		}
 	}
 }
