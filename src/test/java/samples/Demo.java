@@ -11,6 +11,8 @@ import jme3_ext_spatial_explorer.SpatialExplorer;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -92,13 +94,15 @@ public class Demo {
 
 	public static Spatial sampleShapes(SimpleApplication app) {
 		Node anchor = new Node("anchor");
-		for (float x = -5; x <6; x += 2.0) {
+		float l = 0;
+		for (float x = -5; x <6; x += 2.0, l++) {
 			Geometry cube = Helper.makeShape("cube_"+x, new Box(0.5f, 0.5f, 0.5f), ColorRGBA.Yellow, app.getAssetManager(), false);
-			cube.setLocalTranslation(new Vector3f(x, 0, 5));
+			cube.setLocalTranslation(new Vector3f(x, x*0.5f, 5));
+			cube.setLocalRotation(new Quaternion().fromAngleAxis(FastMath.PI * (1.0f/3f) * l, Vector3f.UNIT_Y));
 			anchor.attachChild(cube);
 
-			Geometry sphere = Helper.makeShape("sphere_"+x, new Sphere(8, 8, 0.5f), ColorRGBA.Yellow, app.getAssetManager(), false);
-			sphere.setLocalTranslation(new Vector3f(x, 0, -5));
+			Geometry sphere = Helper.makeShape("sphere_"+x, new Sphere(8, 8, 0.5f), ColorRGBA.Cyan, app.getAssetManager(), false);
+			sphere.setLocalTranslation(new Vector3f(x, x*0.5f, -5));
 			anchor.attachChild(sphere);
 		}
 		return anchor;

@@ -11,6 +11,8 @@ import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
 
 import com.jme3.animation.AnimControl;
+import com.jme3.animation.Skeleton;
+import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
@@ -20,6 +22,7 @@ import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
@@ -225,9 +228,17 @@ public class Helper {
 						if (child != null) {
 							n.detachChild(child);
 						} else {
+							Skeleton sk = null;
+							SkeletonControl sc = n.getControl(SkeletonControl.class);
+							if (sc != null) {
+								sk = sc.getSkeleton();
+							}
 							AnimControl control = n.getControl(AnimControl.class);
-							if (control != null && control.getSkeleton() != null) {
-								final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, control.getSkeleton());
+							if (sk == null && control != null) {
+								sk = control.getSkeleton();
+							}
+							if (sk != null) {
+								final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, sk);
 								final Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 								mat.setColor("Color", ColorRGBA.Green);
 								mat.getAdditionalRenderState().setDepthTest(false);
@@ -268,19 +279,21 @@ public class Helper {
 
 	@SuppressWarnings("unchecked")
 	public static void registerAction_ShowBound(SpatialExplorer se, SimpleApplication app) {
-		Material mat_box = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-		mat_box.setColor("Color", ColorRGBA.Orange);
+		Material matModel = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		matModel.setColor("Color", ColorRGBA.Orange);
+		Material matWorld = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		matWorld.setColor("Color", ColorRGBA.Red);
 
-		se.treeItemActions.add(new Action("Show Bound", (evt) -> {
+		se.treeItemActions.add(new Action("Show Bounds", (evt) -> {
 			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
 			app.enqueue(() -> {
 				target.breadthFirstTraversal(new SceneGraphVisitorAdapter(){
 					public void visit(Geometry geom) {
-						WireBoxControl ctrl = geom.getControl(WireBoxControl.class);
+						ShowBoundsControl ctrl = geom.getControl(ShowBoundsControl.class);
 						if (ctrl != null) {
 							geom.removeControl(ctrl);
 						} else {
-							geom.addControl(new WireBoxControl(mat_box));
+							geom.addControl(new ShowBoundsControl(matModel, matWorld));
 						}
 					}
 				});
@@ -396,12 +409,17 @@ public class Helper {
 		});
 	}
 
-	public static class WireBoxControl extends AbstractControl {
-		final WireBox wbx = new WireBox();
-		final Geometry gwbx = new Geometry("", wbx);
+	public static class ShowBoundsControl extends AbstractControl {
+		final WireBox mwbx = new WireBox();
+		final Geometry mgeo = new Geometry("", mwbx);
+		final Transform mt = new Transform();
+		final WireBox wwbx = new WireBox();
+		final Geometry wgeo = new Geometry("", mwbx);
+		final Transform wt = new Transform();
 
-		WireBoxControl(Material mat) {
-			gwbx.setMaterial(mat);
+		ShowBoundsControl(Material matModel, Material matWorld) {
+			mgeo.setMaterial(matModel);
+			wgeo.setMaterial(matWorld);
 		}
 
 		@Override
@@ -410,10 +428,13 @@ public class Helper {
 			if (s != null) {
 				Node root = s.getParent();
 				for(;root.getParent() != null; root = root.getParent());
-				root.attachChild(gwbx);
-				gwbx.setName("bounds." + s.getName());
+				mgeo.setName("bounds.model." + s.getName());
+				root.attachChild(mgeo);
+				wgeo.setName("bounds.world." + s.getName());
+				root.attachChild(wgeo);
 			} else {
-				gwbx.removeFromParent();
+				wgeo.removeFromParent();
+				mgeo.removeFromParent();
 			}
 		}
 
@@ -421,15 +442,26 @@ public class Helper {
 		protected void controlUpdate(float tpf) {
 			Geometry geom = (Geometry) getSpatial();
 			if (geom != null) {
-				wbx.fromBoundingBox((BoundingBox) geom.getModelBound());
-				gwbx.setLocalTransform(geom.getWorldTransform());
-				//gwbx.updateGeometricState();
+				// world
+				BoundingBox wbb = (BoundingBox) geom.getWorldBound();
+				wwbx.fromBoundingBox(wbb);
+				wt.loadIdentity();
+				wt.setTranslation(wbb.getCenter());
+				wgeo.setLocalTransform(wt);
+				// model
+				BoundingBox mbb = (BoundingBox) geom.getModelBound();
+				mwbx.fromBoundingBox(mbb);
+				mt.loadIdentity();
+				mt.setTranslation(mbb.getCenter());
+				mt.combineWithParent(geom.getWorldTransform());
+				mgeo.setLocalTransform(mt);
 			}
 		}
 
 		@Override
 		protected void controlRender(RenderManager rm, ViewPort vp) {
-		}
+			// TODO Auto-generated method stub
 
+		}
 	}
 }
