@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser;
 
@@ -311,9 +312,15 @@ public class Helper {
 	@SuppressWarnings("unchecked")
 	public static void registerAction_Remove(SpatialExplorer se, SimpleApplication app) {
 		se.treeItemActions.add(new Action("Remove", (evt) -> {
-			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
+			TreeItem<Spatial> treeItem = ((TreeItem<Spatial>)evt.getSource());
+			Spatial target = treeItem.getValue();
 			app.enqueue(() -> {
-				target.removeFromParent();
+				if (target.getParent() != null) {
+					target.removeFromParent();
+					Platform.runLater(() ->{
+						se.update(treeItem.getParent().getValue(), treeItem.getParent());
+					});
+				}
 				return null;
 			});
 		}));

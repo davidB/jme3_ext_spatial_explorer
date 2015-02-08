@@ -128,15 +128,38 @@ public class SpatialExplorer {
 
 	void update(Spatial value, TreeItem<Spatial> item) {
 		item.setValue(value);
-		item.getChildren().clear();
-		if (value == null) return;
+		if (value == null) {
+			item.getChildren().clear();
+			return;
+		}
 
 		if (value instanceof Node) {
-			for (Spatial child : ((Node)value).getChildren()) {
-				TreeItem<Spatial> childItem = new TreeItem<Spatial>();
+			// resync list without clearing to keep state of existing TreeItem (expends,...)
+			List<Spatial> spatials = ((Node)value).getChildren();
+			ObservableList<TreeItem<Spatial>> items = item.getChildren();
+			int i = 0;
+			for (i=0; i < spatials.size(); i++) {
+				Spatial child = spatials.get(i);
+				TreeItem<Spatial> childItem = null;
+				while (items.size() > i) {
+					TreeItem<Spatial> c = items.get(i);
+					if (c.getValue().equals(child)) {
+						childItem = c;
+						break;
+					}
+					items.remove(i);
+				}
+				if (childItem == null) {
+					childItem = new TreeItem<Spatial>();
+					items.add(childItem);
+				}
 				update(child, childItem);
-				item.getChildren().add(childItem);
 			}
+			while (i < items.size()) {
+				items.remove(i);
+			}
+		} else {
+			item.getChildren().clear();
 		}
 	}
 
