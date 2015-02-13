@@ -9,6 +9,9 @@ import jme3_ext_spatial_explorer.AppStateSpatialExplorer;
 import jme3_ext_spatial_explorer.Helper;
 import jme3_ext_spatial_explorer.SpatialExplorer;
 
+import com.jme3.animation.AnimControl;
+import com.jme3.animation.Animation;
+import com.jme3.animation.SpatialTrack;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -89,6 +92,17 @@ public class Demo {
 		cube.setUserData("sample int", 42);
 		cube.setUserData("sample float", 42.0f);
 		cube.setUserData("sample vector3f", new Vector3f(-2.0f, 3.0f, 4.0f));
+		AnimControl ac = new AnimControl();
+		Animation aniY = new Animation("Y basic translation", 10);
+		aniY.addTrack(new SpatialTrack(new float[]{0, 5 , 10}, new Vector3f[]{new Vector3f(0, -5, 0), new Vector3f(0, 5, 0), new Vector3f(0, -5, 0)}, null, null));
+		ac.addAnim(aniY);
+		Animation aniX = new Animation("X basic translation", 10);
+		aniX.addTrack(new SpatialTrack(new float[]{0, 5 , 10}, new Vector3f[]{new Vector3f(-5, 0, 0), new Vector3f(5, 0, 0), new Vector3f(-5, 0, 0)}, null, null));
+		ac.addAnim(aniX);
+		Animation aniZ = new Animation("Z basic translation", 10);
+		aniZ.addTrack(new SpatialTrack(new float[]{0, 5 , 10}, new Vector3f[]{new Vector3f(0, 0, -5), new Vector3f(0, 0, 5), new Vector3f(0, 0, -5)}, null, null));
+		ac.addAnim(aniZ);
+		cube.addControl(ac);
 		return cube;
 	}
 

@@ -31,7 +31,7 @@ public class AppStateSpatialExplorer extends AbstractAppState {
 		if (enabled && app != null) {
 			Platform.runLater(new Runnable() {
 				public void run() {
-					spatialExplorer.start(new Stage());
+					spatialExplorer.start(new Stage(), "Spatial Explorer");
 					spatialExplorer.updateRoot(app.getRootNode());
 				}
 			});

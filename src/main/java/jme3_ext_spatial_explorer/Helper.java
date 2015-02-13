@@ -9,11 +9,15 @@ import java.util.Set;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
 
+import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
+import com.jme3.animation.Animation;
+import com.jme3.animation.LoopMode;
 import com.jme3.animation.Skeleton;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
@@ -326,6 +330,49 @@ public class Helper {
 		}));
 	}
 
+	@SuppressWarnings("unchecked")
+	public static void registerAction_ExploreAnimation(SpatialExplorer se, SimpleApplication app) {
+		se.treeItemActions.add(new Action("Explore Animation", (evt) -> {
+			TreeItem<Spatial> treeItem = ((TreeItem<Spatial>)evt.getSource());
+			Spatial target = treeItem.getValue();
+			AnimationExplorer exp = new AnimationExplorer();
+			registerAction_PlayAnimation(exp, app);
+			registerAction_StopAnimation(exp, app);
+			exp.start(new Stage(), "Animation Explorer");
+			exp.updateRoot(target);
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_PlayAnimation(AnimationExplorer exp, SimpleApplication app) {
+		exp.treeItemActions.add(new Action("play", (evt) -> {
+			TreeItem<Object> treeItem = ((TreeItem<Object>)evt.getSource());
+			Object target = treeItem.getValue();
+			if (target instanceof Animation) {
+				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
+				ac.clearChannels();
+
+				Animation ani = ((Animation)target);
+				AnimChannel channel = ac.createChannel();
+				channel.setAnim(ani.getName());
+				channel.setLoopMode(LoopMode.DontLoop);
+				channel.setSpeed(1f);
+			}
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_StopAnimation(AnimationExplorer exp, SimpleApplication app) {
+		exp.treeItemActions.add(new Action("stop", (evt) -> {
+			TreeItem<Object> treeItem = ((TreeItem<Object>)evt.getSource());
+			Object target = treeItem.getValue();
+			if (target instanceof Animation) {
+				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
+				ac.clearChannels();
+			}
+		}));
+	}
+
 	public static void registerBarAction_SceneInWireframe(SpatialExplorer se, SimpleApplication app) {
 		WireProcessor p = new WireProcessor(app.getAssetManager());
 		se.barActions.add(new Action("Scene In Wireframe", (evt) -> {
@@ -403,6 +450,7 @@ public class Helper {
 		}));
 	}
 
+
 	public static void registerBarAction_ShowFrustums(SpatialExplorer se, SimpleApplication app) {
 		se.barActions.add(new Action("Show Frustums", (evt) -> {
 			app.enqueue(() -> {
@@ -458,6 +506,7 @@ public class Helper {
 			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
 			Helper.registerAction_ShowBound(se.spatialExplorer, app);
 			Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
+			Helper.registerAction_ExploreAnimation(se.spatialExplorer, app);
 			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
 			Helper.registerAction_Remove(se.spatialExplorer, app);
 			Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
