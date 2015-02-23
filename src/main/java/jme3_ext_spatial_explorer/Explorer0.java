@@ -134,7 +134,13 @@ public class Explorer0<Entry, Root extends Entry> {
 			for (Action a : treeItemActions) {
 				MenuItem mi = ActionUtils.createMenuItem(a);
 				//MenuItem mi = new MenuItem(a.getText());
-				mi.setOnAction((evt) -> {a.handle(new ActionEvent(getTreeItem(), evt.getTarget()));});
+				mi.setOnAction((evt) -> {
+					try {
+						a.handle(new ActionEvent(getTreeItem(), evt.getTarget()));
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+				});
 				menu.getItems().add(mi);
 			}
 		}
