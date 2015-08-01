@@ -27,7 +27,6 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import lombok.RequiredArgsConstructor;
 
 import org.controlsfx.control.MasterDetailPane;
 import org.controlsfx.control.PropertySheet;
@@ -50,6 +49,9 @@ public class Explorer0<Entry, Root extends Entry> {
 	/** List of actions on TreeItem via ContextMenu. actions should be registered before start(). */
 	public final List<Action> treeItemActions = new LinkedList<>();
 	public final List<Action> barActions = new LinkedList<>();
+
+	public Stage getStage() { return stage;	}
+	public PropertySheet getDetails() { return details;	}
 
 	MasterDetailPane makePane() {
 		details = new PropertySheet();
@@ -242,8 +244,14 @@ class ActionShowInPropertySheet<T> extends Action {
 		return p.getWriteMethod() != null && !p.getPropertyType().isAssignableFrom(EventHandler.class);
 	}
 
-	@RequiredArgsConstructor
 	static class BasicItem implements PropertySheet.Item {
+		public BasicItem(String category, String name, Object value) {
+			super();
+			this.category = category;
+			this.name = name;
+			this.value = value;
+		}
+
 		final String category;
 		final String name;
 		final Object value;
