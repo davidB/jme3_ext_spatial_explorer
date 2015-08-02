@@ -36,6 +36,7 @@ import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.property.BeanProperty;
 
+import com.jme3.light.Light;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 
@@ -88,15 +89,16 @@ public class Explorer0<Entry, Root extends Entry> {
 	}
 
 	public ToolBar makeBar() {
-		ToolBar b = new ToolBar();
-		for(Action a : barActions) {
-			javafx.scene.Node n = a.getGraphic();
-			if (n == null) {
-				n = ActionUtils.createButton(a);
-			}
-			b.getItems().add(n);
-		}
-		return b;
+//		ToolBar b = new ToolBar();
+//		for(Action a : barActions) {
+//			javafx.scene.Node n = a.getGraphic();
+//			if (n == null) {
+//				n = ActionUtils.createButton(a);
+//			}
+//			b.getItems().add(n);
+//		}
+//		return b;
+	 	return ActionUtils.createToolBar(barActions, ActionUtils.ActionTextBehavior.SHOW);
 	}
 
 	public void start(Stage primaryStage, String title) {
@@ -218,7 +220,7 @@ class ActionShowInPropertySheet<T> extends Action {
 			for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
 				if (isProperty(p) && ! p.isHidden() && p.getReadMethod() != null) {
 					BeanProperty bp = new BeanProperty(bean, p);
-					bp.setEditable(false);
+					bp.setEditable(true);
 					list.add(bp);
 				}
 			}
@@ -230,6 +232,10 @@ class ActionShowInPropertySheet<T> extends Action {
 				for(int i = 0; i < sp.getNumControls(); i++){
 					Control ctrl = sp.getControl(i);
 					list.add(new BasicItem("Controls", ctrl.getClass().getSimpleName(), ctrl));
+				}
+				for(int i = 0; i < sp.getLocalLightList().size(); i++){
+					Light light = sp.getLocalLightList().get(i);
+					list.add(new BasicItem("Light", light.getClass().getSimpleName(), light));
 				}
 			}
 		} catch (IntrospectionException e) {
