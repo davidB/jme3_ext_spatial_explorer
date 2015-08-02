@@ -4,6 +4,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.controlsfx.control.action.Action;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 
 import jme3_ext_spatial_explorer.AppStateSpatialExplorer;
 import jme3_ext_spatial_explorer.Helper;
@@ -123,8 +126,12 @@ public class Demo {
 	}
 
 	public static void registerBarAction_PrintToto(SpatialExplorer se) {
-		se.barActions.add(new Action("Toto", (evt) -> {
+		Action action = new Action("Toto", (evt) -> {
 			System.out.println("toto");
-		}));
+		});
+//		Action action = Helper.makeAction("toto", FontAwesome.Glyph.GLASS, (evt) -> {
+//			System.out.println("toto");
+//		});
+		se.barActions.add(action);
 	}
 }

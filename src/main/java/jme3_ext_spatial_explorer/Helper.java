@@ -5,14 +5,20 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
@@ -54,7 +60,8 @@ import com.jme3.shadow.ShadowUtil;
 // TODO add helper to displayDebug and displayFrustum of AbstractShadowRenderer (a SceneProcessor)
 // TODO add helper to list SceneProcessor and display Properties
 public class Helper {
-
+	private static AtomicBoolean initialized = new AtomicBoolean(false);
+	
 	public static void dump(Node node, String prefix) {
 		List<Spatial> children = node.getChildren();
 		System.out.printf("%s %s (%d)\n", prefix, node.getName(), children.size());
@@ -68,9 +75,12 @@ public class Helper {
 	public static void initJfx() {
 		//new JFXPanel();
 		// Note that calling PlatformImpl.startup more than once is OK
-		PlatformImpl.startup(() -> {
-			Helper.initJfxStyle();
-		});
+		//if (!initialized.get()) {
+			PlatformImpl.startup(() -> {
+				Helper.initJfxStyle();
+				initialized.set(true);
+			});
+		//}
 	}
 
 	//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
@@ -150,6 +160,15 @@ public class Helper {
 		mat.setColor("Color", color);
 		g.setMaterial(mat);
 		return g;
+	}
+	
+	public static Action makeAction(String tooltip, FontAwesome.Glyph g, Consumer<ActionEvent> eventHandler) {
+		initJfx();
+		Action action = new Action("", eventHandler);
+		GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
+		action.setGraphic(fontAwesome.create(g));
+		action.setLongText(tooltip);
+		return action;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -375,7 +394,7 @@ public class Helper {
 
 	public static void registerBarAction_SceneInWireframe(SpatialExplorer se, SimpleApplication app) {
 		WireProcessor p = new WireProcessor(app.getAssetManager());
-		se.barActions.add(new Action("Scene In Wireframe", (evt) -> {
+		se.barActions.add(makeAction("Scene In Wireframe", FontAwesome.Glyph.DIAMOND, (evt) -> {
 			app.enqueue(() -> {
 				if (app.getViewPort().getProcessors().contains(p)) {
 					app.getViewPort().removeProcessor(p);
@@ -388,7 +407,7 @@ public class Helper {
 	}
 
 	public static void registerBarAction_SceneInDebugPhysic(SpatialExplorer se, SimpleApplication app) {
-		se.barActions.add(new Action("Debug Physic", (evt) -> {
+		se.barActions.add(makeAction("Debug Physic", FontAwesome.Glyph.GEAR, (evt) -> {
 			app.enqueue(() -> {
 				BulletAppState s = app.getStateManager().getState(BulletAppState.class);
 				if (s != null) {
@@ -401,7 +420,7 @@ public class Helper {
 	}
 
 	public static void registerBarAction_ShowStats(SpatialExplorer se, SimpleApplication app) {
-		se.barActions.add(new Action("Show Stats", (evt) -> {
+		se.barActions.add(makeAction("Show Stats", FontAwesome.Glyph.ALIGN_LEFT, (evt) -> {
 			app.enqueue(() -> {
 				StatsAppState s = app.getStateManager().getState(StatsAppState.class);
 				if (s == null) {
@@ -426,7 +445,7 @@ public class Helper {
 	}
 
 	public static void registerBarAction_ShowFps(SpatialExplorer se, SimpleApplication app) {
-		se.barActions.add(new Action("Show FPS", (evt) -> {
+		se.barActions.add(makeAction("Show FPS", FontAwesome.Glyph.DASHBOARD, (evt) -> {
 			app.enqueue(() -> {
 				StatsAppState s = app.getStateManager().getState(StatsAppState.class);
 				if (s == null) {
@@ -452,7 +471,7 @@ public class Helper {
 
 
 	public static void registerBarAction_ShowFrustums(SpatialExplorer se, SimpleApplication app) {
-		se.barActions.add(new Action("Show Frustums", (evt) -> {
+		se.barActions.add(makeAction("Show Frustums", FontAwesome.Glyph.VIDEO_CAMERA, (evt) -> {
 			app.enqueue(() -> {
 				Node grp = (Node) app.getRootNode().getChild("_frustums");
 				if (grp != null) {
