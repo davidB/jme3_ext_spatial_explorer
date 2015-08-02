@@ -18,7 +18,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "0.7.1"
+version = "0.8.0"
 group = "net.alchim31.jme3"
 def description = "A debug tool for jmonkeyengine : display a window to browse the content of node (root of the scene by default)."
 
@@ -34,7 +34,7 @@ sourceSets.main.resources.srcDir 'src/main/java'
 def v_jme3 = '3.0.10'
 
 dependencies {
-	compile 'org.controlsfx:controlsfx:8.20.8'
+	compile 'org.controlsfx:controlsfx:8.40.9'
 	provided "com.jme3:jme3-core:${v_jme3}"
 	provided "com.jme3:jme3-desktop:${v_jme3}"
 	provided "com.jme3:jme3-lwjgl:${v_jme3}"
