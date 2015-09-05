@@ -61,6 +61,7 @@ import com.jme3.shadow.ShadowUtil;
 // TODO add helper to list SceneProcessor and display Properties
 public class Helper {
 	private static AtomicBoolean initialized = new AtomicBoolean(false);
+	private static String FontAwesome4 = "FontAwesome4";
 	
 	public static void dump(Node node, String prefix) {
 		List<Spatial> children = node.getChildren();
@@ -78,7 +79,6 @@ public class Helper {
 		//if (!initialized.get()) {
 			PlatformImpl.startup(() -> {
 				Helper.initJfxStyle();
-				initialized.set(true);
 			});
 		//}
 	}
@@ -87,6 +87,10 @@ public class Helper {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static void initJfxStyle() {
 		//use reflection because sun.util.logging.PlatformLogger.Level is not always available
+		if (initialized.getAndSet(true)){
+			// already initialized
+			return;
+		}
 		try {
 			//com.sun.javafx.Logging.getCSSLogger().setLevel(sun.util.logging.PlatformLogger.Level.SEVERE);
 			Class<Enum> e = (Class<Enum>)Class.forName("sun.util.logging.PlatformLogger$Level");
@@ -95,6 +99,11 @@ public class Helper {
 		} catch(Exception exc) {
 			exc.printStackTrace();
 		}
+		System.out.println(">>>>>>>>>>> " + Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
+		GlyphFontRegistry.register(FontAwesome4, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"), 16);
+		System.out.println(">>>>>>>>>>> " + GlyphFontRegistry.font(FontAwesome4));
+
+
 //		StyleManager.getInstance().addUserAgentStylesheet(Thread.currentThread().getContextClassLoader().getResource( "com/sun/javafx/scene/control/skin/modena/modena.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(GlyphFont.class.getResource("glyphfont.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(CommandLinksDialog.class.getResource("commandlink.bss").toExternalForm());
@@ -165,8 +174,9 @@ public class Helper {
 	public static Action makeAction(String tooltip, FontAwesome.Glyph g, Consumer<ActionEvent> eventHandler) {
 		initJfx();
 		Action action = new Action("", eventHandler);
-		GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
-		action.setGraphic(fontAwesome.create(g));
+		GlyphFont fontAwesome = GlyphFontRegistry.font(FontAwesome4);
+		System.out.println(" ... " + g + " ... " +fontAwesome.create(g));
+		action.setGraphic(fontAwesome.create(g).size(14));
 		action.setLongText(tooltip);
 		return action;
 	}
