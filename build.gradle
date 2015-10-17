@@ -18,7 +18,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "0.8.0"
+version = "0.8.1"
 group = "net.alchim31.jme3"
 def description = "A debug tool for jmonkeyengine : display a window to browse the content of node (root of the scene by default)."
 
