@@ -218,11 +218,11 @@ class ActionShowInPropertySheet<T> extends Action {
 		try {
 			BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass(), Object.class);
 			for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
-				if (isProperty(p) && ! p.isHidden() && p.getReadMethod() != null) {
+				//if (isProperty(p) && !p.isHidden()) {
 					BeanProperty bp = new BeanProperty(bean, p);
-					bp.setEditable(true);
+					bp.setEditable(p.getWriteMethod() != null);
 					list.add(bp);
-				}
+				//}
 			}
 			if (bean instanceof Spatial) {
 				Spatial sp = (Spatial)bean;
@@ -247,7 +247,7 @@ class ActionShowInPropertySheet<T> extends Action {
 
 	private static boolean isProperty(final PropertyDescriptor p) {
 		//TODO  Add more filtering
-		return p.getWriteMethod() != null && !p.getPropertyType().isAssignableFrom(EventHandler.class);
+		return p.getReadMethod() != null ;//&& !p.getPropertyType().isAssignableFrom(EventHandler.class);
 	}
 
 	static class BasicItem implements PropertySheet.Item {
