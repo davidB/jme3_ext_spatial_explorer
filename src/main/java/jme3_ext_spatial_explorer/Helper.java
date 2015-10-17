@@ -2,6 +2,7 @@ package jme3_ext_spatial_explorer;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TreeItem;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -19,6 +21,7 @@ import org.controlsfx.control.action.Action;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.GlyphFont;
 import org.controlsfx.glyphfont.GlyphFontRegistry;
+import org.controlsfx.glyphfont.FontAwesome.Glyph;
 
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
@@ -78,19 +81,38 @@ public class Helper {
 		// Note that calling PlatformImpl.startup more than once is OK
 		//if (!initialized.get()) {
 			PlatformImpl.startup(() -> {
-				Helper.initJfxStyle();
+				//use reflection because sun.util.logging.PlatformLogger.Level is not always available
+				if (initialized.getAndSet(true)){
+					// already initialized
+					return;
+				}
+				//Helper.initJfxStyle();
+				//Helper.initFont();
 			});
 		//}
 	}
 
+	public static void initFont() {
+		System.out.println(">>>>>>>>>>> " + Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
+		//GlyphFontRegistry.register(FontAwesome4, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"), 14);
+		//GlyphFontRegistry.register(FontAwesome4, "http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/fonts/fontawesome-webfont.ttf", 14);
+		//GlyphFont gf = new GlyphFont(FontAwesome4, 14, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
+		//GlyphFont gf = new GlyphFont(FontAwesome4, 14, Helper.class.getResource("/Interface/Fonts/fa-3.ttf").toExternalForm());
+		//GlyphFont gf = new GlyphFont(FontAwesome4, 14, "http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/fonts/fontawesome-webfont.ttf", true);
+		//gf.registerAll(Arrays.asList(FontAwesome.Glyph.values()));
+		//GlyphFontRegistry.register(gf);
+        // Register a custom default font
+        //GlyphFontRegistry.register("icomoon", HelloGlyphFont.class.getResourceAsStream("icomoon.ttf") , 16);
+		String fontUri = Helper.class.getResource("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf").toExternalForm();
+		//Font.loadFont(fontUri, 16);
+        GlyphFontRegistry.register(new FontAwesome(fontUri));
+        //GlyphFontRegistry.font(FontAwesome4).registerAll(Arrays.asList(FontAwesome.Glyph.values()));
+		//System.out.println(">>>>>>wwwww " + GlyphFontRegistry.font(FontAwesome4).create(FontAwesome.Glyph.DASHBOARD.getChar()));
+	}
+	
 	//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static void initJfxStyle() {
-		//use reflection because sun.util.logging.PlatformLogger.Level is not always available
-		if (initialized.getAndSet(true)){
-			// already initialized
-			return;
-		}
 		try {
 			//com.sun.javafx.Logging.getCSSLogger().setLevel(sun.util.logging.PlatformLogger.Level.SEVERE);
 			Class<Enum> e = (Class<Enum>)Class.forName("sun.util.logging.PlatformLogger$Level");
@@ -99,9 +121,6 @@ public class Helper {
 		} catch(Exception exc) {
 			exc.printStackTrace();
 		}
-		System.out.println(">>>>>>>>>>> " + Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
-		GlyphFontRegistry.register(FontAwesome4, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"), 16);
-		System.out.println(">>>>>>>>>>> " + GlyphFontRegistry.font(FontAwesome4));
 
 
 //		StyleManager.getInstance().addUserAgentStylesheet(Thread.currentThread().getContextClassLoader().getResource( "com/sun/javafx/scene/control/skin/modena/modena.bss").toExternalForm());
@@ -121,7 +140,7 @@ public class Helper {
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("notificationpopup.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("plusminusslider.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("popover.bss").toExternalForm());
-		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
+///		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("rangeslider.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("rating.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("segmentedbutton.bss").toExternalForm());
@@ -172,11 +191,12 @@ public class Helper {
 	}
 	
 	public static Action makeAction(String tooltip, FontAwesome.Glyph g, Consumer<ActionEvent> eventHandler) {
-		initJfx();
 		Action action = new Action("", eventHandler);
-		GlyphFont fontAwesome = GlyphFontRegistry.font(FontAwesome4);
-		System.out.println(" ... " + g + " ... " +fontAwesome.create(g));
-		action.setGraphic(fontAwesome.create(g).size(14));
+		//GlyphFont fontAwesome = GlyphFontRegistry.font(FontAwesome4);
+		GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
+		//javafx.scene.Node icon = fontAwesome.create(g.getChar()).size(16).useHoverEffect();
+		//System.out.println(" ... " + g + " ... " + icon);
+		action.setGraphic(fontAwesome.create(g).size(16).useHoverEffect());
 		action.setLongText(tooltip);
 		return action;
 	}
@@ -530,19 +550,22 @@ public class Helper {
 	public static void setupSpatialExplorerWithAll(SimpleApplication app) {
 		app.enqueue(() -> {
 			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
-			Helper.registerAction_Refresh(se.spatialExplorer);
-			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
-			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
-			Helper.registerAction_ShowBound(se.spatialExplorer, app);
-			Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
-			Helper.registerAction_ExploreAnimation(se.spatialExplorer, app);
-			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
-			Helper.registerAction_Remove(se.spatialExplorer, app);
-			Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
-			Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
-			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
-			Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
-			Helper.registerBarAction_ShowFrustums(se.spatialExplorer, app);
+			Helper.initJfx();
+			Platform.runLater(() -> {
+				Helper.registerAction_Refresh(se.spatialExplorer);
+				Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
+				Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
+				Helper.registerAction_ShowBound(se.spatialExplorer, app);
+				Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
+				Helper.registerAction_ExploreAnimation(se.spatialExplorer, app);
+				Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
+				Helper.registerAction_Remove(se.spatialExplorer, app);
+				Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
+				Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
+				Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
+				Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
+				Helper.registerBarAction_ShowFrustums(se.spatialExplorer, app);
+			});
 			app.getStateManager().attach(se);
 			return null;
 		});
