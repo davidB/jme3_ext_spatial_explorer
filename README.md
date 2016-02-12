@@ -2,6 +2,8 @@ A simple (extensible) GUI window to display the content (Spatials) of a jmonkeye
 
 Requirements: javafx 8 (java 8u20+)
 
+![sample](http://i.imgur.com/hyUF6sa.png)
+
 # Install
 
 ## build.gradle
