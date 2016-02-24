@@ -11,13 +11,12 @@ Requirements: javafx 8 (java 8u20+)
 ```
 repositories {
 	//...
-	maven { url "http://updates.jmonkeyengine.org/maven/"}
-	maven { url "http://dl.bintray.com/jmonkeyengine/contrib" }
+	maven { url "https://jitpack.io" }
 }
 
 dependencies {
 	//...
-	testCompile 'net.alchim31.jme3:jme3_ext_spatial_explorer:0+'
+	testCompile 'com.github.davidb:jme3_ext_spatial_explorer:-SNAPSHOT'
 }
 ```
 

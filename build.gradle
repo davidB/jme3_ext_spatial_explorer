@@ -3,22 +3,21 @@ plugins {
 	id "maven-publish"
 	id "eclipse"
 	id "nebula.provided-base" version "2.2.2"
-	id "com.jfrog.bintray" version "1.2"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "0.8.1"
-group = "net.alchim31.jme3"
+version = "git describe --always --dirty".execute().text.trim()
+println("version : '${version}'")
+
+group = "com.github.davidb"
 def description = "A debug tool for jmonkeyengine : display a window to browse the content of node (root of the scene by default)."
 
 repositories {
-	mavenLocal()
 	jcenter()
 	maven { url "http://updates.jmonkeyengine.org/maven/"}
-	maven { url "http://dl.bintray.com/jmonkeyengine/contrib" }
 }
 
 def v_jme3 = '3.0.10'
@@ -63,30 +62,6 @@ publishing {
 				root.appendNode('description', description)
 				root.children().last() + pomConfig
 			}
-		}
-	}
-}
-
-bintray {
-	user = bintray_user
-	key = bintray_api_key
-
-	publications = ['mavenStuff'] //When uploading Maven-based publication files
-	//dryRun = false //Whether to run this as dry-run, without deploying
-	publish = true //If version should be auto published after an upload
-	pkg {
-		repo = 'jme3stuff'
-		name = project.name
-		desc = description
-		websiteUrl = "https://github.com/davidB/${project.name}"
-		issueTrackerUrl = "https://github.com/davidB/${project.name}/issues"
-		vcsUrl = "https://github.com/davidB/${project.name}.git"
-		licenses = ['CC0-1.0']
-		labels = ['jme3']
-		publicDownloadNumbers = true
-		version {
-			name = project.version
-			vcsTag = project.version
 		}
 	}
 }
