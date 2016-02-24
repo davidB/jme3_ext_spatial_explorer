@@ -387,6 +387,7 @@ public class Helper {
 			AnimationExplorer exp = new AnimationExplorer();
 			registerAction_PlayAnimation(exp, app);
 			registerAction_StopAnimation(exp, app);
+			registerAction_ResetSkeleton(exp, app);
 			exp.start(new Stage(), "Animation Explorer");
 			exp.updateRoot(target);
 		}));
@@ -418,6 +419,22 @@ public class Helper {
 			if (target instanceof Animation) {
 				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
 				ac.clearChannels();
+			}
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void registerAction_ResetSkeleton(AnimationExplorer exp, SimpleApplication app) {
+		exp.treeItemActions.add(new Action("reset skeleton", (evt) -> {
+			TreeItem<Object> treeItem = ((TreeItem<Object>)evt.getSource());
+			Object target = treeItem.getValue();
+			if (target instanceof Animation) {
+				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
+				ac.clearChannels();
+				Skeleton sk = ac.getSkeleton();
+				if (sk != null) {
+					sk.resetAndUpdate();
+				}
 			}
 		}));
 	}
