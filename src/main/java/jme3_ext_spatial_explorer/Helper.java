@@ -2,42 +2,25 @@ package jme3_ext_spatial_explorer;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.scene.control.TreeItem;
-import javafx.scene.text.Font;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.GlyphFont;
 import org.controlsfx.glyphfont.GlyphFontRegistry;
-import org.controlsfx.glyphfont.FontAwesome.Glyph;
 
-import com.jme3.animation.AnimChannel;
-import com.jme3.animation.AnimControl;
-import com.jme3.animation.Animation;
-import com.jme3.animation.LoopMode;
-import com.jme3.animation.Skeleton;
-import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
-import com.jme3.bullet.BulletAppState;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -45,6 +28,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -53,12 +37,16 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
-import com.jme3.scene.debug.SkeletonDebugger;
+import com.jme3.scene.debug.WireBox;
 import com.jme3.scene.debug.WireFrustum;
+import com.jme3.shadow.ShadowUtil;
 import com.sun.javafx.application.PlatformImpl;
 import com.sun.javafx.css.StyleManager;
-import com.jme3.scene.debug.WireBox;
-import com.jme3.shadow.ShadowUtil;
+
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.scene.control.TreeItem;
+import javafx.stage.FileChooser;
 
 // TODO add helper to displayDebug and displayFrustum of AbstractShadowRenderer (a SceneProcessor)
 // TODO add helper to list SceneProcessor and display Properties
@@ -81,38 +69,19 @@ public class Helper {
 		// Note that calling PlatformImpl.startup more than once is OK
 		//if (!initialized.get()) {
 			PlatformImpl.startup(() -> {
-				//use reflection because sun.util.logging.PlatformLogger.Level is not always available
-				if (initialized.getAndSet(true)){
-					// already initialized
-					return;
-				}
-				//Helper.initJfxStyle();
-				//Helper.initFont();
+				Helper.initJfxStyle();
 			});
 		//}
 	}
 
-	public static void initFont() {
-		System.out.println(">>>>>>>>>>> " + Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
-		//GlyphFontRegistry.register(FontAwesome4, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"), 14);
-		//GlyphFontRegistry.register(FontAwesome4, "http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/fonts/fontawesome-webfont.ttf", 14);
-		//GlyphFont gf = new GlyphFont(FontAwesome4, 14, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
-		//GlyphFont gf = new GlyphFont(FontAwesome4, 14, Helper.class.getResource("/Interface/Fonts/fa-3.ttf").toExternalForm());
-		//GlyphFont gf = new GlyphFont(FontAwesome4, 14, "http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/fonts/fontawesome-webfont.ttf", true);
-		//gf.registerAll(Arrays.asList(FontAwesome.Glyph.values()));
-		//GlyphFontRegistry.register(gf);
-        // Register a custom default font
-        //GlyphFontRegistry.register("icomoon", HelloGlyphFont.class.getResourceAsStream("icomoon.ttf") , 16);
-		String fontUri = Helper.class.getResource("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf").toExternalForm();
-		//Font.loadFont(fontUri, 16);
-        GlyphFontRegistry.register(new FontAwesome(fontUri));
-        //GlyphFontRegistry.font(FontAwesome4).registerAll(Arrays.asList(FontAwesome.Glyph.values()));
-		//System.out.println(">>>>>>wwwww " + GlyphFontRegistry.font(FontAwesome4).create(FontAwesome.Glyph.DASHBOARD.getChar()));
-	}
-	
 	//HACK: workaround see https://bitbucket.org/controlsfx/controlsfx/issue/370/using-controlsfx-causes-css-errors-and
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static void initJfxStyle() {
+		//use reflection because sun.util.logging.PlatformLogger.Level is not always available
+		if (initialized.getAndSet(true)){
+			// already initialized
+			return;
+		}
 		try {
 			//com.sun.javafx.Logging.getCSSLogger().setLevel(sun.util.logging.PlatformLogger.Level.SEVERE);
 			Class<Enum> e = (Class<Enum>)Class.forName("sun.util.logging.PlatformLogger$Level");
@@ -121,6 +90,9 @@ public class Helper {
 		} catch(Exception exc) {
 			exc.printStackTrace();
 		}
+		System.out.println(">>>>>>>>>>> " + Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
+		GlyphFontRegistry.register(FontAwesome4, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"), 16);
+		System.out.println(">>>>>>>>>>> " + GlyphFontRegistry.font(FontAwesome4));
 
 
 //		StyleManager.getInstance().addUserAgentStylesheet(Thread.currentThread().getContextClassLoader().getResource( "com/sun/javafx/scene/control/skin/modena/modena.bss").toExternalForm());
@@ -140,7 +112,7 @@ public class Helper {
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("notificationpopup.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("plusminusslider.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("popover.bss").toExternalForm());
-///		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
+		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("propertysheet.css").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("rangeslider.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("rating.bss").toExternalForm());
 //		StyleManager.getInstance().addUserAgentStylesheet(PropertySheet.class.getResource("segmentedbutton.bss").toExternalForm());
@@ -191,12 +163,11 @@ public class Helper {
 	}
 	
 	public static Action makeAction(String tooltip, FontAwesome.Glyph g, Consumer<ActionEvent> eventHandler) {
+		initJfx();
 		Action action = new Action("", eventHandler);
-		//GlyphFont fontAwesome = GlyphFontRegistry.font(FontAwesome4);
-		GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
-		//javafx.scene.Node icon = fontAwesome.create(g.getChar()).size(16).useHoverEffect();
-		//System.out.println(" ... " + g + " ... " + icon);
-		action.setGraphic(fontAwesome.create(g).size(16).useHoverEffect());
+		GlyphFont fontAwesome = GlyphFontRegistry.font(FontAwesome4);
+		System.out.println(" ... " + g + " ... " +fontAwesome.create(g));
+		action.setGraphic(fontAwesome.create(g).size(14));
 		action.setLongText(tooltip);
 		return action;
 	}
@@ -272,48 +243,6 @@ public class Helper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void registerAction_ShowSkeleton(SpatialExplorer se, SimpleApplication app) {
-		se.treeItemActions.add(new Action("Show Skeleton", (evt) -> {
-			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
-			app.enqueue(() -> {
-				target.breadthFirstTraversal(new SceneGraphVisitorAdapter(){
-					public void visit(Node n) {
-						String name = "skeletonDebugger.";
-						int i = -1;
-						Spatial child;
-						do {
-							i++;
-							child = n.getChild(name + i);
-						} while (child != null && !(child instanceof SkeletonDebugger));
-						if (child != null) {
-							n.detachChild(child);
-						} else {
-							Skeleton sk = null;
-							SkeletonControl sc = n.getControl(SkeletonControl.class);
-							if (sc != null) {
-								sk = sc.getSkeleton();
-							}
-							AnimControl control = n.getControl(AnimControl.class);
-							if (sk == null && control != null) {
-								sk = control.getSkeleton();
-							}
-							if (sk != null) {
-								final SkeletonDebugger skeletonDebug = new SkeletonDebugger(name + i, sk);
-								final Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-								mat.setColor("Color", ColorRGBA.Green);
-								mat.getAdditionalRenderState().setDepthTest(false);
-								skeletonDebug.setMaterial(mat);
-								n.attachChild(skeletonDebug);
-							}
-						}
-					}
-				});
-				return null;
-			});
-		}));
-	}
-
-	@SuppressWarnings("unchecked")
 	public static void registerAction_ShowWireframe(SpatialExplorer se, SimpleApplication app) {
 		se.treeItemActions.add(new Action("Show Wireframe", (evt) -> {
 			Spatial target = ((TreeItem<Spatial>)evt.getSource()).getValue();
@@ -379,66 +308,6 @@ public class Helper {
 		}));
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void registerAction_ExploreAnimation(SpatialExplorer se, SimpleApplication app) {
-		se.treeItemActions.add(new Action("Explore Animation", (evt) -> {
-			TreeItem<Spatial> treeItem = ((TreeItem<Spatial>)evt.getSource());
-			Spatial target = treeItem.getValue();
-			AnimationExplorer exp = new AnimationExplorer();
-			registerAction_PlayAnimation(exp, app);
-			registerAction_StopAnimation(exp, app);
-			registerAction_ResetSkeleton(exp, app);
-			exp.start(new Stage(), "Animation Explorer");
-			exp.updateRoot(target);
-		}));
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void registerAction_PlayAnimation(AnimationExplorer exp, SimpleApplication app) {
-		exp.treeItemActions.add(new Action("play", (evt) -> {
-			TreeItem<Object> treeItem = ((TreeItem<Object>)evt.getSource());
-			Object target = treeItem.getValue();
-			if (target instanceof Animation) {
-				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
-				ac.clearChannels();
-
-				Animation ani = ((Animation)target);
-				AnimChannel channel = ac.createChannel();
-				channel.setAnim(ani.getName());
-				channel.setLoopMode(LoopMode.DontLoop);
-				channel.setSpeed(1f);
-			}
-		}));
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void registerAction_StopAnimation(AnimationExplorer exp, SimpleApplication app) {
-		exp.treeItemActions.add(new Action("stop", (evt) -> {
-			TreeItem<Object> treeItem = ((TreeItem<Object>)evt.getSource());
-			Object target = treeItem.getValue();
-			if (target instanceof Animation) {
-				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
-				ac.clearChannels();
-			}
-		}));
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void registerAction_ResetSkeleton(AnimationExplorer exp, SimpleApplication app) {
-		exp.treeItemActions.add(new Action("reset skeleton", (evt) -> {
-			TreeItem<Object> treeItem = ((TreeItem<Object>)evt.getSource());
-			Object target = treeItem.getValue();
-			if (target instanceof Animation) {
-				AnimControl ac = ((Spatial)treeItem.getParent().getValue()).getControl(AnimControl.class);
-				ac.clearChannels();
-				Skeleton sk = ac.getSkeleton();
-				if (sk != null) {
-					sk.resetAndUpdate();
-				}
-			}
-		}));
-	}
-
 	public static void registerBarAction_SceneInWireframe(SpatialExplorer se, SimpleApplication app) {
 		WireProcessor p = new WireProcessor(app.getAssetManager());
 		se.barActions.add(makeAction("Scene In Wireframe", FontAwesome.Glyph.DIAMOND, (evt) -> {
@@ -448,19 +317,6 @@ public class Helper {
 				} else {
 					app.getViewPort().addProcessor(p);
 				}
-				return null;
-			});
-		}));
-	}
-
-	public static void registerBarAction_SceneInDebugPhysic(SpatialExplorer se, SimpleApplication app) {
-		se.barActions.add(makeAction("Debug Physic", FontAwesome.Glyph.GEAR, (evt) -> {
-			app.enqueue(() -> {
-				BulletAppState s = app.getStateManager().getState(BulletAppState.class);
-				if (s != null) {
-					s.setDebugEnabled(!s.isDebugEnabled());
-				}
-				//physicsSpace.enableDebug(assetManager);
 				return null;
 			});
 		}));
@@ -567,22 +423,18 @@ public class Helper {
 	public static void setupSpatialExplorerWithAll(SimpleApplication app) {
 		app.enqueue(() -> {
 			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
-			Helper.initJfx();
-			Platform.runLater(() -> {
-				Helper.registerAction_Refresh(se.spatialExplorer);
-				Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
-				Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
-				Helper.registerAction_ShowBound(se.spatialExplorer, app);
-				Helper.registerAction_ShowSkeleton(se.spatialExplorer, app);
-				Helper.registerAction_ExploreAnimation(se.spatialExplorer, app);
-				Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
-				Helper.registerAction_Remove(se.spatialExplorer, app);
-				Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
-				Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
-				Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
-				Helper.registerBarAction_SceneInDebugPhysic(se.spatialExplorer, app);
-				Helper.registerBarAction_ShowFrustums(se.spatialExplorer, app);
-			});
+			Helper.registerAction_Refresh(se.spatialExplorer);
+			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
+			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
+			Helper.registerAction_ShowBound(se.spatialExplorer, app);
+			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
+			Helper.registerAction_Remove(se.spatialExplorer, app);
+			Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
+			Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
+			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
+			Helper.registerBarAction_ShowFrustums(se.spatialExplorer, app);
+			Actions4Animation.registerAllActions(se.spatialExplorer, app);
+			Actions4Bullet.registerAllActions(se.spatialExplorer, app);
 			app.getStateManager().attach(se);
 			return null;
 		});
