@@ -65,7 +65,7 @@ see [Demo.java](src/test/java/samples/Demo.java] for a complete sample.
 	}
 ```
 
-see registerAction_Refresh or registerAction_ShowLocalAxis in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for a complete sample.
+see registerAction_Refresh or registerAction_ShowLocalAxis in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java) for a complete sample.
 
 ## Add action on selection change
 
@@ -95,5 +95,5 @@ see registerAction_Refresh or registerAction_ShowLocalAxis in [Helper.java](src/
 	}
 ```
 
-see registerBarAction_Xxx in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java] for samples.
+see registerBarAction_Xxx in [Helper.java](src/main/java/jme3_ext_spatial_explorer/Helper.java) for samples.
 
