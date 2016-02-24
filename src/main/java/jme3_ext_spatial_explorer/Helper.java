@@ -52,7 +52,7 @@ import javafx.stage.FileChooser;
 // TODO add helper to list SceneProcessor and display Properties
 public class Helper {
 	private static AtomicBoolean initialized = new AtomicBoolean(false);
-	private static String FontAwesome4 = "FontAwesome4";
+	private static String FontAwesome4 = "FontAwesome";
 	
 	public static void dump(Node node, String prefix) {
 		List<Spatial> children = node.getChildren();
@@ -90,9 +90,8 @@ public class Helper {
 		} catch(Exception exc) {
 			exc.printStackTrace();
 		}
-		System.out.println(">>>>>>>>>>> " + Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
-		GlyphFontRegistry.register(FontAwesome4, Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"), 16);
-		System.out.println(">>>>>>>>>>> " + GlyphFontRegistry.font(FontAwesome4));
+		GlyphFont f = new FontAwesome(Helper.class.getResourceAsStream("/Interface/Fonts/fontawesome-webfont-4.4.0.ttf"));
+		GlyphFontRegistry.register(f);
 
 
 //		StyleManager.getInstance().addUserAgentStylesheet(Thread.currentThread().getContextClassLoader().getResource( "com/sun/javafx/scene/control/skin/modena/modena.bss").toExternalForm());
@@ -166,7 +165,6 @@ public class Helper {
 		initJfx();
 		Action action = new Action("", eventHandler);
 		GlyphFont fontAwesome = GlyphFontRegistry.font(FontAwesome4);
-		System.out.println(" ... " + g + " ... " +fontAwesome.create(g));
 		action.setGraphic(fontAwesome.create(g).size(14));
 		action.setLongText(tooltip);
 		return action;
