@@ -1,18 +1,10 @@
-buildscript {
-	repositories {
-		jcenter()
-	}
-	dependencies {
-		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
-		classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-	}
+plugins {
+	id "java"
+	id "maven-publish"
+	id "eclipse"
+	id "nebula.provided-base" version "2.2.2"
+	id "com.jfrog.bintray" version "1.2"
 }
-
-apply plugin: 'java'
-apply plugin: 'provided-base'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -28,8 +20,6 @@ repositories {
 	maven { url "http://updates.jmonkeyengine.org/maven/"}
 	maven { url "http://dl.bintray.com/jmonkeyengine/contrib" }
 }
-
-sourceSets.main.resources.srcDir 'src/main/java'
 
 def v_jme3 = '3.0.10'
 
