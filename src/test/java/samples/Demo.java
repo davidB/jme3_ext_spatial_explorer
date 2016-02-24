@@ -4,13 +4,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.controlsfx.control.action.Action;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.GlyphFont;
-import org.controlsfx.glyphfont.GlyphFontRegistry;
-
-import jme3_ext_spatial_explorer.AppStateSpatialExplorer;
-import jme3_ext_spatial_explorer.Helper;
-import jme3_ext_spatial_explorer.SpatialExplorer;
 
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.Animation;
@@ -26,6 +19,10 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
+
+import jme3_ext_spatial_explorer.AppStateSpatialExplorer;
+import jme3_ext_spatial_explorer.Helper;
+import jme3_ext_spatial_explorer.SpatialExplorer;
 
 public class Demo {
 
