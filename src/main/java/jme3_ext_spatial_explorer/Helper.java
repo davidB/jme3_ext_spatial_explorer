@@ -121,7 +121,7 @@ public class Helper {
 	}
 
 	public static Node makeScene(SimpleApplication app) {
-		Node scene = new Node("demo");
+		Node scene = new Node("_referential");
 		AssetManager assetManager = app.getAssetManager();
 		scene.attachChild(makeGrid(Vector3f.ZERO, 10, ColorRGBA.Blue, assetManager));
 		scene.attachChild(makeCoordinateAxes(Vector3f.ZERO, assetManager));
@@ -129,13 +129,13 @@ public class Helper {
 	}
 
 	public static Spatial makeGrid(Vector3f pos, int size, ColorRGBA color, AssetManager assetManager){
-		Geometry g = makeShape("wireframe grid", new Grid(size, size, 1.0f), color, assetManager, true);
+		Geometry g = makeShape("_grid", new Grid(size, size, 1.0f), color, assetManager, true);
 		g.center().move(pos);
 		return g;
 	}
 
 	public static Spatial makeCoordinateAxes(Vector3f pos, AssetManager assetManager){
-		Node b = new Node("axis");
+		Node b = new Node("_axis");
 		b.setLocalTranslation(pos);
 
 		Arrow arrow = new Arrow(Vector3f.UNIT_X);
@@ -399,7 +399,7 @@ public class Helper {
 		for(int i = 0; i < pts.length; i++) pts[i] = new Vector3f();
 		ShadowUtil.updateFrustumPoints2(cam, pts);
 		WireFrustum frustum = new WireFrustum(pts);
-		Geometry frustumMdl = new Geometry("frustum."+cam.getName(), frustum);
+		Geometry frustumMdl = new Geometry("_frustum."+cam.getName(), frustum);
 		frustumMdl.setCullHint(Spatial.CullHint.Never);
 		frustumMdl.setShadowMode(ShadowMode.Off);
 		frustumMdl.setMaterial(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
@@ -420,20 +420,21 @@ public class Helper {
 
 	public static void setupSpatialExplorerWithAll(SimpleApplication app) {
 		app.enqueue(() -> {
-			AppStateSpatialExplorer se = new AppStateSpatialExplorer();
-			Helper.registerAction_Refresh(se.spatialExplorer);
-			Helper.registerAction_ShowLocalAxis(se.spatialExplorer, app);
-			Helper.registerAction_ShowWireframe(se.spatialExplorer, app);
-			Helper.registerAction_ShowBound(se.spatialExplorer, app);
-			Helper.registerAction_SaveAsJ3O(se.spatialExplorer, app);
-			Helper.registerAction_Remove(se.spatialExplorer, app);
-			Helper.registerBarAction_ShowFps(se.spatialExplorer, app);
-			Helper.registerBarAction_ShowStats(se.spatialExplorer, app);
-			Helper.registerBarAction_SceneInWireframe(se.spatialExplorer, app);
-			Helper.registerBarAction_ShowFrustums(se.spatialExplorer, app);
-			Actions4Animation.registerAllActions(se.spatialExplorer, app);
-			Actions4Bullet.registerAllActions(se.spatialExplorer, app);
-			app.getStateManager().attach(se);
+			AppStateSpatialExplorer ase = new AppStateSpatialExplorer();
+			SpatialExplorer se = ase.spatialExplorer;
+			Helper.registerAction_Refresh(se);
+			Helper.registerAction_ShowLocalAxis(se, app);
+			Helper.registerAction_ShowWireframe(se, app);
+			Helper.registerAction_ShowBound(se, app);
+			Helper.registerAction_SaveAsJ3O(se, app);
+			Helper.registerAction_Remove(se, app);
+			Helper.registerBarAction_ShowFps(se, app);
+			Helper.registerBarAction_ShowStats(se, app);
+			Helper.registerBarAction_SceneInWireframe(se, app);
+			Helper.registerBarAction_ShowFrustums(se, app);
+			Actions4Animation.registerAllActions(se, app);
+			Actions4Bullet.registerAllActions(se, app);
+			app.getStateManager().attach(ase);
 			return null;
 		});
 	}
@@ -461,9 +462,9 @@ public class Helper {
 			if (s != null) {
 				Node root = s.getParent();
 				for(;root.getParent() != null; root = root.getParent());
-				mgeo.setName("bounds.model." + s.getName());
+				mgeo.setName("_bounds.model." + s.getName());
 				root.attachChild(mgeo);
-				wgeo.setName("bounds.world." + s.getName());
+				wgeo.setName("_bounds.world." + s.getName());
 				root.attachChild(wgeo);
 			} else {
 				wgeo.removeFromParent();
