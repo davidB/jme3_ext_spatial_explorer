@@ -5,31 +5,31 @@ plugins {
 	id "nebula.provided-base" version "2.2.2"
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-
-version = "git describe --always --dirty".execute().text.trim()
-println("version : '${version}'")
-
 group = "com.github.davidb"
 def description = "A debug tool for jmonkeyengine : display a window to browse the content of node (root of the scene by default)."
+version = "git describe --always --dirty".execute().text.trim()
+println("version : '${version}'")
 
 repositories {
 	jcenter()
 	maven { url "http://updates.jmonkeyengine.org/maven/"}
 }
 
-def v_jme3 = '3.0.10'
+def jme3 = [v:'3.0.10', g:'com.jme3']
+//def jme3 = [v:'3.1.0-alpha2', g:'org.jmonkeyengine']
 
 dependencies {
 	compile 'org.controlsfx:controlsfx:8.40.9'
-	provided "com.jme3:jme3-core:${v_jme3}"
-	provided "com.jme3:jme3-desktop:${v_jme3}"
-	provided "com.jme3:jme3-lwjgl:${v_jme3}"
-	provided "com.jme3:jme3-bullet:${v_jme3}"
+	provided "${jme3.g}:jme3-core:${jme3.v}"
+	provided "${jme3.g}:jme3-desktop:${jme3.v}"
+	provided "${jme3.g}:jme3-lwjgl:${jme3.v}"
+	provided "${jme3.g}:jme3-bullet:${jme3.v}"
 	testCompile 'junit:junit:4.12'
 }
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 task sourcesJar(type: Jar) {
 	from sourceSets.main.allSource
@@ -37,6 +37,7 @@ task sourcesJar(type: Jar) {
 }
 
 def pomConfig = {
+	url "https://github.com/davidB/${project.name}"
 	licenses {
 		license {
 			name "Public domain (CC0-1.0)"
