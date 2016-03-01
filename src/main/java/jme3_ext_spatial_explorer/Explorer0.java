@@ -192,7 +192,7 @@ class ActionShowInPropertySheet<T> extends Action {
 			public void handle(WorkerStateEvent e) {
 				ObservableList<Item> items = (ObservableList<Item>) e.getSource().getValue();
 				if (items != null) {
-					propertySheet.getItems().setAll(items);
+					propertySheet.getItems().setAll(items.filtered((v) -> v != null));
 				} else {
 					propertySheet.getItems().clear();
 				}
@@ -218,11 +218,11 @@ class ActionShowInPropertySheet<T> extends Action {
 		try {
 			BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass(), Object.class);
 			for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
-				//if (isProperty(p) && !p.isHidden()) {
+				if (isProperty(p) && !p.isHidden()) {
 					BeanProperty bp = new BeanProperty(bean, p);
 					bp.setEditable(p.getWriteMethod() != null);
 					list.add(bp);
-				//}
+				}
 			}
 			if (bean instanceof Spatial) {
 				Spatial sp = (Spatial)bean;
