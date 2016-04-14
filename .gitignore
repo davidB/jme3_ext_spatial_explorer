@@ -1,4 +1,5 @@
 /lib
+/log
 tmp
 *.off
 *.orig
@@ -12,6 +13,7 @@ build
 # native created when running
 *.so
 *.dll
+*.dylib
 
 # eclipse
 bin/
