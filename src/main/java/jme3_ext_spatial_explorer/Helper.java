@@ -53,7 +53,7 @@ import javafx.stage.FileChooser;
 public class Helper {
 	private static AtomicBoolean initialized = new AtomicBoolean(false);
 	private static String FontAwesome4 = "FontAwesome";
-	
+
 	public static void dump(Node node, String prefix) {
 		List<Spatial> children = node.getChildren();
 		System.out.printf("%s %s (%d)\n", prefix, node.getName(), children.size());
@@ -138,17 +138,17 @@ public class Helper {
 		Node b = new Node("_axis");
 		b.setLocalTranslation(pos);
 
-		Arrow arrow = new Arrow(Vector3f.UNIT_X);
-		arrow.setLineWidth(4); // make arrow thicker
-		b.attachChild(makeShape("x", arrow, ColorRGBA.Red, assetManager, true));
+		Geometry arrow = makeShape("x", new Arrow(Vector3f.UNIT_X), ColorRGBA.Red, assetManager, true);
+		arrow.getMaterial().getAdditionalRenderState().setLineWidth(4); // make arrow thicker
+		b.attachChild(arrow);
 
-		arrow = new Arrow(Vector3f.UNIT_Y);
-		arrow.setLineWidth(4); // make arrow thicker
-		b.attachChild(makeShape("y", arrow, ColorRGBA.Green, assetManager, true));
+		arrow = makeShape("y", new Arrow(Vector3f.UNIT_Y), ColorRGBA.Green, assetManager, true);
+		arrow.getMaterial().getAdditionalRenderState().setLineWidth(4); // make arrow thicker
+		b.attachChild(arrow);
 
-		arrow = new Arrow(Vector3f.UNIT_Z);
-		arrow.setLineWidth(4); // make arrow thicker
-		b.attachChild(makeShape("z", arrow, ColorRGBA.Blue, assetManager, true));
+		arrow = makeShape("z", new Arrow(Vector3f.UNIT_Z), ColorRGBA.Blue, assetManager, true);
+		arrow.getMaterial().getAdditionalRenderState().setLineWidth(4); // make arrow thicker
+		b.attachChild(arrow);
 		return b;
 	}
 
@@ -160,7 +160,7 @@ public class Helper {
 		g.setMaterial(mat);
 		return g;
 	}
-	
+
 	public static Action makeAction(String tooltip, FontAwesome.Glyph g, Consumer<ActionEvent> eventHandler) {
 		initJfx();
 		Action action = new Action("", eventHandler);
@@ -478,13 +478,16 @@ public class Helper {
 			if (geom != null) {
 				// world
 				BoundingBox wbb = (BoundingBox) geom.getWorldBound();
-				wwbx.fromBoundingBox(wbb);
+				//TODO use WireBox.makeGeometry ?
+				//wwbx.fromBoundingBox(wbb);
+				wwbx.updatePositions(wbb.getXExtent(), wbb.getYExtent(), wbb.getZExtent());
 				wt.loadIdentity();
 				wt.setTranslation(wbb.getCenter());
 				wgeo.setLocalTransform(wt);
 				// model
 				BoundingBox mbb = (BoundingBox) geom.getModelBound();
-				mwbx.fromBoundingBox(mbb);
+				//TODO use WireBox.makeGeometry ?
+				mwbx.updatePositions(mbb.getXExtent(), mbb.getYExtent(), mbb.getZExtent());
 				mt.loadIdentity();
 				mt.setTranslation(mbb.getCenter());
 				mt.combineWithParent(geom.getWorldTransform());

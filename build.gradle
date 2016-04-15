@@ -12,19 +12,20 @@ println("version : '${version}'")
 
 repositories {
 	jcenter()
-	maven { url "http://updates.jmonkeyengine.org/maven/"}
+	maven { url "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine"}
 }
 
-def jme3 = [v:'3.0.10', g:'com.jme3']
-//def jme3 = [v:'3.1.0-alpha2', g:'org.jmonkeyengine']
+//def jme3 = [v:'3.0.10', g:'com.jme3']
+def jme3 = [v:'3.1.0-alpha5', g:'org.jmonkeyengine']
 
 dependencies {
 	compile 'org.controlsfx:controlsfx:8.40.9'
 	provided "${jme3.g}:jme3-core:${jme3.v}"
-	provided "${jme3.g}:jme3-desktop:${jme3.v}"
-	provided "${jme3.g}:jme3-lwjgl:${jme3.v}"
 	provided "${jme3.g}:jme3-bullet:${jme3.v}"
 	testCompile 'junit:junit:4.12'
+	testRuntime "${jme3.g}:jme3-bullet-native:${jme3.v}"
+	testRuntime "${jme3.g}:jme3-desktop:${jme3.v}"
+	testRuntime "${jme3.g}:jme3-lwjgl:${jme3.v}"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
