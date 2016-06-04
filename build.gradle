@@ -67,3 +67,8 @@ publishing {
 		}
 	}
 }
+
+task run(type:JavaExec) {
+	main = System.getProperty("exec.mainClass") ?: "samples.Demo"
+	classpath = sourceSets.test.runtimeClasspath
+}
