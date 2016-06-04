@@ -16,7 +16,7 @@ repositories {
 }
 
 //def jme3 = [v:'3.0.10', g:'com.jme3']
-def jme3 = [v:'3.1.0-alpha5', g:'org.jmonkeyengine']
+def jme3 = [v:'3.1.0-beta1', g:'org.jmonkeyengine']
 
 dependencies {
 	compile 'org.controlsfx:controlsfx:8.40.9'
@@ -67,4 +67,3 @@ publishing {
 		}
 	}
 }
-
