@@ -87,6 +87,8 @@ public class Helper {
 			Class<Enum> e = (Class<Enum>)Class.forName("sun.util.logging.PlatformLogger$Level");
 			Object o = Class.forName("com.sun.javafx.Logging").getMethod("getCSSLogger").invoke(null);
 			o.getClass().getMethod("setLevel", e).invoke(o, Enum.valueOf(e, "SEVERE"));
+		} catch(ClassNotFoundException exc) {
+			// ignore
 		} catch(Exception exc) {
 			exc.printStackTrace();
 		}
