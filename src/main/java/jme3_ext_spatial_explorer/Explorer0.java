@@ -6,9 +6,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -195,7 +197,7 @@ class ActionShowInPropertySheet<T> extends Action {
 					try {
 						propertySheet.getItems().setAll(items.filtered((v) -> v != null));
 					} catch (Exception exc) {
-						exc.printStackTrace();
+						//exc.printStackTrace();
 						propertySheet.getItems().clear();
 					}
 				} else {
@@ -301,5 +303,10 @@ class ActionShowInPropertySheet<T> extends Action {
 		public boolean isEditable() {
 			return false;
 		}
+
+		@Override
+		public Optional<ObservableValue<? extends Object>> getObservableValue(){
+			return Optional.empty();
+		} 
 	}
 }
