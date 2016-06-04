@@ -192,7 +192,12 @@ class ActionShowInPropertySheet<T> extends Action {
 			public void handle(WorkerStateEvent e) {
 				ObservableList<Item> items = (ObservableList<Item>) e.getSource().getValue();
 				if (items != null) {
-					propertySheet.getItems().setAll(items.filtered((v) -> v != null));
+					try {
+						propertySheet.getItems().setAll(items.filtered((v) -> v != null));
+					} catch (Exception exc) {
+						exc.printStackTrace();
+						propertySheet.getItems().clear();
+					}
 				} else {
 					propertySheet.getItems().clear();
 				}
