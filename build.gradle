@@ -19,7 +19,7 @@ repositories {
 def jme3 = [v:'3.1.0-beta1', g:'org.jmonkeyengine']
 
 dependencies {
-	compile 'org.controlsfx:controlsfx:8.40.10'
+	compile 'org.controlsfx:controlsfx:8.40.12'
 	provided "${jme3.g}:jme3-core:${jme3.v}"
 	provided "${jme3.g}:jme3-bullet:${jme3.v}"
 	testCompile 'junit:junit:4.12'
