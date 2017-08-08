@@ -7,14 +7,26 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 
+import com.jme3.scene.Node;
+
 public class AppStateSpatialExplorer extends AbstractAppState {
 	public final SpatialExplorer spatialExplorer = new SpatialExplorer();
 	SimpleApplication app;
+	Node exploreNode;
 
+	public AppStateSpatialExplorer() { }
+	
+	public AppStateSpatialExplorer(Node exploreNode) {
+		this.exploreNode = exploreNode;
+	}
+	
 	@Override
 	public void initialize(AppStateManager stateManager, com.jme3.app.Application app) {
 		super.initialize(stateManager, app);
 		this.app =(SimpleApplication) app;
+		if(this.exploreNode == null) {
+			this.exploreNode = this.app.getRootNode();
+		}
 		Helper.initJfx();
 		setEnabled(true);
 	}
@@ -32,7 +44,7 @@ public class AppStateSpatialExplorer extends AbstractAppState {
 			Platform.runLater(new Runnable() {
 				public void run() {
 					spatialExplorer.start(new Stage(), "Spatial Explorer");
-					spatialExplorer.updateRoot(app.getRootNode());
+					spatialExplorer.updateRoot(exploreNode);
 				}
 			});
 		} else {

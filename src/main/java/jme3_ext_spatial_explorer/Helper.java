@@ -421,8 +421,12 @@ public class Helper {
 	}
 
 	public static void setupSpatialExplorerWithAll(SimpleApplication app) {
+		setupSpatialExplorerWithAll(app, app.getRootNode());
+	}
+	
+	public static void setupSpatialExplorerWithAll(SimpleApplication app, final Node exploreNode) {
 		app.enqueue(() -> {
-			AppStateSpatialExplorer ase = new AppStateSpatialExplorer();
+			AppStateSpatialExplorer ase = new AppStateSpatialExplorer(exploreNode);
 			SpatialExplorer se = ase.spatialExplorer;
 			Helper.registerAction_Refresh(se);
 			Helper.registerAction_ShowLocalAxis(se, app);
